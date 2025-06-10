@@ -2,10 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dylan Geraci • Portfolio</title>
 
   <!-- Google Fonts -->
@@ -14,7 +11,7 @@
     rel="stylesheet"
   />
 
-  <!-- Font Awesome (for the social icons) -->
+  <!-- Font Awesome -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -22,6 +19,9 @@
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
   />
+
+  <!-- AOS Animations -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 
   <!-- Main stylesheet -->
   <link rel="stylesheet" href="style.css" />
@@ -35,7 +35,6 @@
       justify-content: center;
       background-color: var(--clr-background);
     }
-
     .hero-content {
       display: flex;
       align-items: center;
@@ -43,25 +42,21 @@
       width: 90%;
       max-width: 1100px;
     }
-
     .hero-left {
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
-
     .hero-left h1 {
       font-size: 3rem;
       color: var(--clr-text);
     }
-
     .rotating-text {
       font-size: 1.25rem;
       color: var(--clr-text);
-      height: 1.5rem; /* keep height consistent */
+      height: 1.5rem;
       overflow: hidden;
     }
-
     .hero-right img {
       width: 200px;
       height: 200px;
@@ -69,43 +64,29 @@
       border-radius: 50%;
       border: 4px solid var(--clr-accent);
     }
-
-    /* Ensure the rest of the page is below the hero */
-    main {
-      margin-top: 0;
-    }
-
-    /* Responsive Adjustments */
     @media (max-width: 768px) {
       .hero-content {
         flex-direction: column-reverse;
         text-align: center;
       }
-
       .hero-right img {
         margin-bottom: 2rem;
       }
-
       .hero-left h1 {
         font-size: 2.5rem;
       }
-
       .rotating-text {
         font-size: 1rem;
       }
     }
   </style>
 </head>
+
 <body>
-  <!-- ===== Header (always visible) ===== -->
+  <!-- Header -->
   <header>
     <div class="header-container">
-      <!-- Light/Dark Toggle -->
-      <button id="theme-toggle" aria-label="Toggle light/dark mode">
-        🌞
-      </button>
-
-      <!-- Navigation Links -->
+      <button id="theme-toggle" aria-label="Toggle light/dark mode">🌞</button>
       <nav>
         <ul class="nav-links">
           <li><a href="#about">About</a></li>
@@ -116,39 +97,46 @@
     </div>
   </header>
 
-  <!-- ===== Hero (Landing) Section ===== -->
+  <!-- Hero -->
   <section class="hero-section">
     <div class="hero-content">
-      <!-- Left: Name + rotating text -->
       <div class="hero-left">
         <h1>Dylan Geraci</h1>
-        <p class="rotating-text" id="rotating-text">
-          <!-- Initial text (will be replaced by script) -->
-        </p>
+        <p class="rotating-text" id="rotating-text"></p>
       </div>
-
-      <!-- Right: Profile image -->
       <div class="hero-right">
         <img src="assets/profile.jpg" alt="Dylan Geraci" />
       </div>
     </div>
   </section>
 
-  <!-- ===== Main Content (requires scrolling) ===== -->
+  <!-- Main Content -->
   <main>
-    <!-- About Section -->
-    <section id="about" class="section">
+    <!-- About -->
+    <section
+      id="about"
+      class="section"
+      data-aos="fade-up"
+      data-aos-duration="800"
+      data-aos-once="true"
+    >
       <div class="section-content container">
         <h2>About</h2>
         <p>
-          A brief introduction about me goes here. Describe who I am,
-          what I do, and what drives me.
+          A brief introduction about me goes here. Describe who I am, what I do,
+          and what drives me.
         </p>
       </div>
     </section>
 
-    <!-- Education Section -->
-    <section id="education" class="section">
+    <!-- Education -->
+    <section
+      id="education"
+      class="section"
+      data-aos="fade-right"
+      data-aos-duration="800"
+      data-aos-once="true"
+    >
       <div class="section-content container">
         <h2>Education</h2>
         <p>
@@ -158,36 +146,37 @@
       </div>
     </section>
 
-    <!-- Contact Me Section (combines links) -->
-    <section id="contact" class="section">
+    <!-- Contact Me -->
+    <section
+      id="contact"
+      class="section"
+      data-aos="zoom-in"
+      data-aos-duration="800"
+      data-aos-once="true"
+    >
       <div class="section-content container">
         <h2>Contact Me</h2>
         <div class="social-icons">
-          <!-- LinkedIn Icon -->
           <a
-            href="https://linkedin.com/in/YourLinkedInHandle"
+            href="https://www.linkedin.com/in/dylangeraci/"
             target="_blank"
-            aria-label="LinkedIn"
             class="social-link"
+            aria-label="LinkedIn"
           >
             <i class="fab fa-linkedin fa-2x"></i>
           </a>
-
-          <!-- GitHub Icon -->
           <a
-            href="https://github.com/YourUsername"
+            href="https://github.com/Dylan-Geraci"
             target="_blank"
-            aria-label="GitHub"
             class="social-link"
+            aria-label="GitHub"
           >
             <i class="fab fa-github fa-2x"></i>
           </a>
-
-          <!-- Email Icon -->
           <a
-            href="mailto:youremail@example.com"
-            aria-label="Email"
+            href="mailto:senddylmail27@gmail.com"
             class="social-link"
+            aria-label="Email"
           >
             <i class="fas fa-envelope fa-2x"></i>
           </a>
@@ -196,14 +185,23 @@
     </section>
   </main>
 
-  <!-- ===== Footer ===== -->
+  <!-- Footer -->
   <footer>
     <div class="footer-container container">
       <p>© 2025 Dylan Geraci</p>
     </div>
   </footer>
 
-  <!-- ===== Rotating Text Script ===== -->
+  <!-- AOS & Initialization -->
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      duration: 800,
+      once: true
+    });
+  </script>
+
+  <!-- Rotating Text -->
   <script>
     const phrases = [
       'I am a growth-minded developer',
@@ -212,33 +210,29 @@
     ];
     let index = 0;
     const rotatingElement = document.getElementById('rotating-text');
-
     function showNextPhrase() {
       rotatingElement.textContent = phrases[index];
       index = (index + 1) % phrases.length;
     }
-
-    // Initialize with first phrase, then rotate every 3 seconds
     showNextPhrase();
     setInterval(showNextPhrase, 3000);
+  </script>
 
-    // Light/Dark Toggle Script
+  <!-- Theme Toggle -->
+  <script>
     const toggle = document.getElementById('theme-toggle');
     const root = document.documentElement;
-
-    // Check for saved user theme in localStorage
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       root.setAttribute('data-theme', savedTheme);
       toggle.textContent = savedTheme === 'dark' ? '🌙' : '🌞';
     }
-
     toggle.addEventListener('click', () => {
       const current = root.getAttribute('data-theme');
-      const nextTheme = current === 'light' ? 'dark' : 'light';
-      root.setAttribute('data-theme', nextTheme);
-      localStorage.setItem('theme', nextTheme);
-      toggle.textContent = nextTheme === 'dark' ? '🌙' : '🌞';
+      const next = current === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      toggle.textContent = next === 'dark' ? '🌙' : '🌞';
     });
   </script>
 </body>
