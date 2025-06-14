@@ -49,7 +49,37 @@
 									</header>
 								</div>
 								<div class="col-6 col-12-medium">
-									<p></p>
+									<div class="tab-container">
+										<div class="tab-buttons">
+											<button class="tab-btn active" onclick="openTab(event, 'languages')">Languages</button>
+											<button class="tab-btn" onclick="openTab(event, 'tools')">Tools</button>
+											<button class="tab-btn" onclick="openTab(event, 'resume')">Resume</button>
+										</div>
+										<div id="languages" class="tab-content" style="display: block; text-align: center;">
+											<div style="margin: 20px 0;">
+												<img src="images/python.png" alt="Python" style="height:48px;"><br>Python
+											</div>
+											<div style="margin: 20px 0;">
+												<img src="images/html5.png" alt="HTML" style="height:48px;"><br>HTML
+											</div>
+										</div>
+										<div id="tools" class="tab-content" style="display: none; text-align: center;">
+											<div style="margin: 20px 0;">
+												<img src="images/c.png" alt="C" style="height:48px;"><br>C
+											</div>
+											<div style="margin: 20px 0;">
+												<img src="images/css3.png" alt="CSS" style="height:48px;"><br>CSS
+											</div>
+										</div>
+										<div id="resume" class="tab-content" style="display: none; text-align: center;">
+											<div style="margin: 20px 0;">
+												<img src="images/cpp.png" alt="C++" style="height:48px;"><br>C++
+											</div>
+											<div style="margin: 20px 0;">
+												<img src="images/js.png" alt="JavaScript" style="height:48px;"><br>JavaScript
+											</div>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -178,6 +208,21 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<script>
+			function openTab(evt, tabName) {
+				var i, tabcontent, tabbtns;
+				tabcontent = document.getElementsByClassName("tab-content");
+				for (i = 0; i < tabcontent.length; i++) {
+					tabcontent[i].style.display = "none";
+				}
+				tabbtns = document.getElementsByClassName("tab-btn");
+				for (i = 0; i < tabbtns.length; i++) {
+					tabbtns[i].className = tabbtns[i].className.replace(" active", "");
+				}
+				document.getElementById(tabName).style.display = "block";
+				evt.currentTarget.className += " active";
+			}
+			</script>
 
 	</body>
 </html>
