@@ -75,7 +75,8 @@ body {
 .floating-head {
     width: 250px;
     height: 250px;
-    padding-left: 10%;
+    padding-left: 0%;
+    margin-left: -10%;
     border-radius: 50%;
     object-fit: cover;
 }
@@ -200,7 +201,7 @@ body {
     }
   }
 
-.long-beach-logo {
+.fullerton-logo {
     width: 300px;
 }
 
