@@ -75,7 +75,7 @@ body {
 .floating-head {
     width: 250px;
     height: 250px;
-    padding-left: 20%;
+    padding-left: 10%;
     border-radius: 50%;
     object-fit: cover;
 }
