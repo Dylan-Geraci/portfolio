@@ -8,6 +8,7 @@ body {
     margin: 0;
     padding: 0;
     width: 100%;
+    padding-top: 70px; /* Adjust if your navbar is taller/shorter */
 }
 
 /* Custom Color Variables */
@@ -120,8 +121,9 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
-    padding-left: 2rem;
+    align-items: center;
+    padding-left: 0;
+    text-align: center;
 }
 
 .main-title {
@@ -177,7 +179,6 @@ body {
 
 /* About Me */
 .aboutme-title-row h4 {
-    text-decoration: underline;
     color: var(--primary-color);
 }
 
@@ -445,4 +446,29 @@ body {
 #row-icon {
     width: 80%;
 }
+}
+
+.card {
+    background: var(--bg-secondary) !important;
+    border: 1.5px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.card-header {
+    background: var(--bg-primary) !important;
+    color: var(--primary-color) !important;
+    border-bottom: 1.5px solid var(--border-color) !important;
+}
+
+.card-title, .card-body, .card ul, .card li {
+    color: var(--text-primary) !important;
+}
+
+#navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1050;
 }
