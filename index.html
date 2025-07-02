@@ -23,7 +23,18 @@
   <!-- Navbar Section -->
   <nav class="navbar navbar-expand-lg p-0 sticky-top d-flex justify-content-around" id="navbar">
     <div class="container mx-1 pt-1 pb-1">
-      <a class="navbar-brand" href="#home">DG</a>
+      <div class="dark-mode-toggle">
+        <div class="form-check form-switch d-flex align-items-center">
+          <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked onclick="toggleTheme()">
+          <label class="form-check-label ms-2" for="flexSwitchCheckChecked">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon"
+              viewBox="0 0 16 16">
+              <path
+                d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278M4.858 1.311A7.27 7.27 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.32 7.32 0 0 0 5.205-2.162q-.506.063-1.029.063c-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286" />
+            </svg>
+          </label>
+        </div>
+      </div>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
         aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -31,10 +42,10 @@
       <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="#aboutmescroll">About</a>
+            <a class="nav-link" href="#home">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#projects">Projects</a>
+            <a class="nav-link" aria-current="page" href="#aboutmescroll">About</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#education-scroll">Education</a>
@@ -42,14 +53,11 @@
           <li class="nav-item">
             <a class="nav-link" href="#contact">Contact</a>
           </li>
-
         </ul>
       </div>
     </div>
   </nav>
 
-
-  <!-- Dark Mode -->
   <script>
     // Function to set theme colors
     function setThemeColors() {
@@ -80,24 +88,6 @@
       setThemeColors();
     }
   </script>
-
-  <div class="container-fluid dark-mode-container">
-    <div class="row dark-mode-row">
-      <!-- Column for the switch -->
-      <div class="col-1 pe-0 form-check form-switch d-flex justify-content-end align-items-center">
-        <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked onclick="toggleTheme()">
-        <label class="form-check-label ps-1" for="flexSwitchCheckChecked"></label>
-      </div>
-      <!-- Column for the moon icon -->
-      <div class="col-1 ps-1 pe-0 d-flex justify-content-start align-items-center moon-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon me-2"
-          viewBox="0 0 16 16">
-          <path
-            d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278M4.858 1.311A7.27 7.27 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.32 7.32 0 0 0 5.205-2.162q-.506.063-1.029.063c-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286" />
-        </svg>
-      </div>
-    </div>
-  </div>
 
   <!-- Landing Page -->
   <div class="container-fluid landing-container">
@@ -230,8 +220,7 @@
                 <div class="col test-col">
                   <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 16 16" id="github">
                     <path fill="#5C6BC0"
-                      d="M7.999 0C3.582 0 0 3.596 0 8.032a8.031 8.031 0 0 0 5.472 7.621c.4.074.546-.174.546-.387 0-.191-.007-.696-.011-1.366-2.225.485-2.695-1.077-2.695-1.077-.363-.928-.888-1.175-.888-1.175-.727-.498.054-.488.054-.488.803.057 1.225.828 1.225.828.714 1.227 1.873.873 2.329.667.072-.519.279-.873.508-1.074-1.776-.203-3.644-.892-3.644-3.969 0-.877.312-1.594.824-2.156-.083-.203-.357-1.02.078-2.125 0 0 .672-.216 2.2.823a7.633 7.633 0 0 1 2.003-.27 7.65 7.65 0 0 1 2.003.271c1.527-1.039 2.198-.823 2.198-.823.436 1.106.162 1.922.08 2.125.513.562.822 1.279.822 2.156 0 3.085-1.87 3.764-3.652 3.963.287.248.543.738.543 1.487 0 1.074-.01 1.94-.01 2.203 0 .215.144.465.55.386A8.032 8.032 0 0 0 16 8.032C16 3.596 12.418 0 7.999 0z">
-                    </path>
+                      d="M7.999 0C3.582 0 0 3.596 0 8.032a8.031 8.031 0 0 0 5.472 7.621c.4.074.546-.174.546-.387 0-.191-.007-.696-.011-1.366-2.225.485-2.695-1.077-2.695-1.077-.363-.928-.888-1.175-.888-1.175-.727-.498.054-.488.054-.488.803.057 1.225.828 1.225.828.714 1.227 1.873.873 2.329.667.072-.519.279-.873.508-1.074-1.776-.203-3.644-.892-3.644-3.969 0-.877.312-1.594.824-2.156-.083-.203-.357-1.02.078-2.125 0 0 .672-.216 2.2.823a7.633 7.633 0 0 1 2.003-.27 7.65 7.65 0 0 1 2.003.271c1.527-1.039 2.198-.823 2.198-.823.436 1.106.162 1.922.08 2.125.513.562.822 1.279.822 2.156 0 3.085-1.87 3.764-3.652 3.963.287.248.543.738.543 1.487 0 1.074-.01 1.94-.01 2.203 0 .215.144.465.55.386A8.032 8.032 0 0 0 16 8c0-4.42-3.58-8-8-8" />
                   </svg>
                   <p>GitHub</p>
                 </div>
@@ -265,7 +254,7 @@
                           d="M97.098 126.882A7.977 7.977 0 0 1 88 125.333c2.952 2.952 8 .861 8-3.314V5.98c0-4.175-5.048-6.266-8-3.313a7.977 7.977 0 0 1 9.098-1.549L123.467 13.8A8 8 0 0 1 128 21.01v85.982a8 8 0 0 1-4.533 7.21z">
                         </path>
                       </g>
-                      <path fill="url(#deviconVscode3)" fill-rule="evenodd"
+                      <g filter="url(#deviconVscode3)" fill-rule="evenodd"
                         d="M90.69 127.126a7.968 7.968 0 0 0 6.349-.244l26.353-12.681a8 8 0 0 0 4.53-7.21V21.009a8 8 0 0 0-4.53-7.21L97.039 1.12a7.97 7.97 0 0 0-9.093 1.548l-50.45 46.026l-21.974-16.68a5.328 5.328 0 0 0-6.807.302l-7.048 6.411a5.336 5.336 0 0 0-.006 7.888L20.718 64L1.662 81.386a5.335 5.335 0 0 0 .006 7.888l7.048 6.411a5.328 5.328 0 0 0 6.807.303l21.975-16.681l50.45 46.026a7.959 7.959 0 0 0 2.742 1.793m5.252-92.184L57.662 64l38.28 29.057z"
                         clip-rule="evenodd" opacity=".25"></path>
                     </g>
@@ -327,7 +316,7 @@
     </div>
   </div>
 
-  <!-- Projects Section -->
+  <!-- Projects Section - Commented out for later
   <div class="container-fluid projects-section" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000" id="projects">
     <div class="row">
       <div class="col-12 text-center mb-5">
@@ -386,6 +375,7 @@
       </div>
     </div>
   </div>
+  -->
 
   <div class="container education-scroll-custom" id="education-scroll"></div>
   <!-- Education -->
@@ -412,10 +402,7 @@
     </div>
   </div>
 
-
   <!-- Featured Projects -->
-
-
 
   <!-- Contact -->
   <div class="container-fluid" id="contact" data-aos="fade-up" data-aos-delay="250" data-aos-duration="1500">
@@ -439,7 +426,7 @@
           <a href="https://github.com/Dylan-Geraci" target="_blank">
             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
               <path
-                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8" />
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.877.31-1.594.824-2.156-.083-.203-.357-1.02.078-2.125 0 0 .672-.216 2.2.823a7.633 7.633 0 0 1 2.003-.27 7.65 7.65 0 0 1 2.003.271c1.527-1.039 2.198-.823 2.198-.823.436 1.106.162 1.922.08 2.125.513.562.822 1.279.822 2.156 0 3.085-1.87 3.764-3.652 3.963.287.248.543.738.543 1.487 0 1.074-.01 1.94-.01 2.203 0 .215.144.465.55.386A8.032 8.032 0 0 0 16 8c0-4.42-3.58-8-8-8" />
             </svg>
           </a>
         </div>
@@ -454,10 +441,6 @@
       </div>
     </div>
   </div>
-
-
-
-
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script>
