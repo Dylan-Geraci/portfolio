@@ -4,18 +4,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dylan Geraci</title>
+  <meta name="description" content="Dylan Geraci - Software Engineer specializing in AI/ML, full-stack development, and scalable solutions. Computer Science graduate from Cal State Fullerton with expertise in Python, Java, JavaScript, and AWS.">
+  <title>Dylan Geraci - Software Engineer & AI/ML Enthusiast</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Raleway&display=swap" rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Text&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&family=Libre+Barcode+39+Text&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-  <link rel="shortcut icon" type="image/png" href="images/favicon16.png">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%236366f1'/><text x='50%' y='50%' font-family='monospace' font-size='18' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='central'>DG</text></svg>">
 </head>
 
 <body id="home">
@@ -49,6 +47,9 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#education-scroll">Education</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#projects">Projects</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#contact">Contact</a>
@@ -316,8 +317,8 @@
     </div>
   </div>
 
-  <!-- Projects Section - Commented out for later
-  <div class="container-fluid projects-section" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000" id="projects">
+  <!-- Projects Section -->
+  <div class="container projects-section" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000" id="projects">
     <div class="row">
       <div class="col-12 text-center mb-5">
         <h2 class="section-title">Featured Projects</h2>
@@ -327,11 +328,6 @@
     <div class="row g-4">
       <div class="col-lg-4 col-md-6">
         <div class="project-card">
-          <div class="project-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-cpu" viewBox="0 0 16 16">
-              <path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0zM4.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3h-7zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/>
-            </svg>
-          </div>
           <h3>AI/ML Project</h3>
           <p>Machine learning model for predictive analytics using Python and TensorFlow.</p>
           <div class="project-tags">
@@ -343,11 +339,6 @@
       </div>
       <div class="col-lg-4 col-md-6">
         <div class="project-card">
-          <div class="project-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-code-slash" viewBox="0 0 16 16">
-              <path d="M10.478 1.646a.5.5 0 0 1 .708 0L13 4c.5.5.707 1.146.707 1.707V11a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4.707c0-.56.207-1.105.707-1.646L5 2c.5-.5.708-1.146.708-1.707V1H2C.854 1 0 1.854 0 3v10c0 1.104.854 2 2 2h12c1.104 0 2-.896 2-2V3c0-1.104-.896-2-2-2H5.707zM2 12V4h12l.002 8H2z"/>
-            </svg>
-          </div>
           <h3>Web Application</h3>
           <p>Full-stack web application built with modern technologies and responsive design.</p>
           <div class="project-tags">
@@ -359,11 +350,6 @@
       </div>
       <div class="col-lg-4 col-md-6">
         <div class="project-card">
-          <div class="project-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-database" viewBox="0 0 16 16">
-              <path d="M4.318 2.687C5.234 2.271 6.536 2 8 2s2.766.27 3.682.687C12.644 3.125 13 3.627 13 4c0 .374-.356.875-1.318 1.313C10.766 5.729 9.464 6 8 6s-2.766-.27-3.682-.687C3.356 5.125 3 4.623 3 4c0-.374.356-.875 1.318-1.313ZM13 5.698V7c0 .374-.356.875-1.318 1.313C10.766 8.729 9.464 9 8 9s-2.766-.27-3.682-.687C3.356 8.125 3 7.623 3 7V5.698c.835.369 1.677.569 2.5.569s1.665-.2 2.5-.569c.835.369 1.677.569 2.5.569s1.665-.2 2.5-.569Zm0 3.004V9c0 .374-.356.875-1.318 1.313C10.766 10.729 9.464 11 8 11s-2.766-.27-3.682-.687C3.356 10.125 3 9.623 3 9V8.702c.835.369 1.677.569 2.5.569s1.665-.2 2.5-.569c.835.369 1.677.569 2.5.569s1.665-.2 2.5-.569Zm0 3.004V12c0 .374-.356.875-1.318 1.313C10.766 13.729 9.464 14 8 14s-2.766-.27-3.682-.687C3.356 13.125 3 12.623 3 12v-1.298c.835.369 1.677.569 2.5.569s1.665-.2 2.5-.569c.835.369 1.677.569 2.5.569s1.665-.2 2.5-.569Z"/>
-            </svg>
-          </div>
           <h3>Database System</h3>
           <p>Optimized database design and implementation for scalable applications.</p>
           <div class="project-tags">
@@ -375,7 +361,6 @@
       </div>
     </div>
   </div>
-  -->
 
   <div class="container education-scroll-custom" id="education-scroll"></div>
   <!-- Education -->

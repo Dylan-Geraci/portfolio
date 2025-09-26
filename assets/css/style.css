@@ -24,14 +24,14 @@ body {
 }
 
 [data-bs-theme="dark"] {
-    --primary-color: #818cf8;
-    --secondary-color: #a78bfa;
+    --primary-color: #ffffff;
+    --secondary-color: #f1f5f9;
     --accent-color: #22d3ee;
     --text-primary: #f9fafb;
     --text-secondary: #d1d5db;
-    --bg-primary: #111827;
-    --bg-secondary: #1f2937;
-    --border-color: #374151;
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #171717;
+    --border-color: #262626;
 }
 
 /* Dark Mode Button */
@@ -57,6 +57,20 @@ body {
 
 .dark-mode-toggle:hover svg {
     color: var(--secondary-color);
+}
+
+/* Fix dark mode toggle colors */
+[data-bs-theme="dark"] .dark-mode-toggle .form-check-input {
+    border: 2px solid var(--text-primary) !important;
+    background-color: var(--bg-primary) !important;
+}
+
+[data-bs-theme="dark"] .dark-mode-toggle svg {
+    color: var(--text-primary) !important;
+}
+
+[data-bs-theme="dark"] .dark-mode-toggle:hover svg {
+    color: var(--accent-color) !important;
 }
 
 
@@ -221,6 +235,12 @@ body {
     color: white;
   }
 
+  /* Dark mode text contrast fixes */
+  [data-bs-theme="dark"] #pills-tab .nav-link.active,
+  [data-bs-theme="dark"] #pills-tab .nav-link:hover {
+    color: #0a0a0a !important;
+  }
+
   .skill-languages .col {
     display: flex;
     flex-direction: column;
@@ -280,17 +300,6 @@ body {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
-.project-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-    color: white;
-}
 
 .project-card h3 {
     font-size: 1.5rem;
@@ -318,6 +327,10 @@ body {
     border-radius: 1rem;
     font-size: 0.875rem;
     font-weight: 500;
+}
+
+[data-bs-theme="dark"] .tag {
+    color: #0a0a0a !important;
 }
 
 /* Education */
