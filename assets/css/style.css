@@ -300,6 +300,83 @@ body {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
+/* Project Image */
+.project-image {
+    width: 100%;
+    height: 400px;
+    margin-bottom: 1.5rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.project-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.project-image:hover img {
+    transform: scale(1.05);
+}
+
+/* Project Links */
+.project-links {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.project-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.project-link.live-demo {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.project-link.live-demo:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.project-link.github {
+    background: transparent;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.project-link.github:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Dark mode project links */
+[data-bs-theme="dark"] .project-link.live-demo {
+    color: #0a0a0a !important;
+}
+
+[data-bs-theme="dark"] .project-link.live-demo:hover {
+    color: white !important;
+}
+
+[data-bs-theme="dark"] .project-link.github:hover {
+    color: #0a0a0a !important;
+}
+
 
 .project-card h3 {
     font-size: 1.5rem;
@@ -380,6 +457,8 @@ body {
     color: var(--primary-color);
     margin-bottom: 0.5rem;
     display: block;
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
 }
 
 .stat-label {
@@ -422,9 +501,7 @@ body {
 }
 
 .university-header {
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
 }
 
 .university-info h3 {
@@ -447,12 +524,6 @@ body {
     margin-bottom: 0.25rem;
 }
 
-.honors {
-    color: var(--primary-color);
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
 
 /* Achievements Section */
 .achievements-section h4 {
