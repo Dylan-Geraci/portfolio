@@ -348,71 +348,255 @@ body {
         margin-top: 50px;
         border: 0px;
     }
-  }
-
-.fullerton-logo {
-    width: 300px;
 }
 
 #education {
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 320px;
-    margin-bottom: 325px; 
-    font-size: large;
+    margin-top: 120px;
+    margin-bottom: 120px;
+    padding: 4rem 0;
+}
+
+/* Academic Stats Cards */
+.education-stat-card {
     background: var(--bg-secondary);
-    padding: 3rem;
+    border: 1px solid var(--border-color);
     border-radius: 1rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    height: 100%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.education-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-color);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+}
+
+.stat-progress {
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    border-radius: 2px;
+    transition: width 2s ease;
+    width: 0%;
+}
+
+/* Main Education Card */
+.education-main-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.education-main-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.university-header {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.university-info h3 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.degree {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.graduation {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.honors {
+    color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+/* Achievements Section */
+.achievements-section h4 {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.achievement-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.achievement-item:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.achievement-icon {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+    width: 2rem;
+    text-align: center;
+}
+
+.achievement-text {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+/* University Logo */
+.university-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+}
+
+.fullerton-logo-modern {
+    max-width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+    transition: transform 0.3s ease;
+}
+
+.fullerton-logo-modern:hover {
+    transform: scale(1.05);
+}
+
+/* Coursework Section */
+.coursework-section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    margin-top: 2rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 767px) {
+.coursework-section h4 {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.coursework-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.course-tag {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.course-tag:hover {
+    background: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode course tags */
+[data-bs-theme="dark"] .course-tag {
+    color: #0a0a0a !important;
+}
+
+[data-bs-theme="dark"] .course-tag:hover {
+    color: white !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
     #education {
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: 325px; 
-        font-size: small;
-    }
-    .long-beach-logo {
-        display: flex;
-        justify-content: center;
+        padding: 2rem 0;
+        margin-top: 80px;
+        margin-bottom: 80px;
     }
 
-  }
-
-  @media (max-width: 607px) {
-    #education {
-        margin-left: auto;
-        margin-right: auto;
-        padding-left: 5%;
-        padding-right: 5%;
-        margin-bottom: 325px; 
-        font-size: small;
-    }
-    .long-beach-logo {
-        display: flex;
-        justify-content: center;
+    .education-stat-card {
+        margin-bottom: 1rem;
     }
 
-  }
-
-  #education-col{
-    border-right: 1.5px solid var(--border-color);
-  }
-
-  #logo-col {
-    border-left: 1.5px solid var(--border-color);
-  }
-
-  @media (max-width: 549px) {
-    #education-col {
-        border: none;
-    }
-    #logo-col{
-        border: none;
+    .stat-number {
+        font-size: 2rem;
     }
 
-  }
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .coursework-tags {
+        gap: 0.5rem;
+    }
+
+    .course-tag {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
 
   /* Featured Projects */
 
