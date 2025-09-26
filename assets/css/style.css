@@ -490,7 +490,7 @@ body {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 1rem;
-    padding: 2.5rem;
+    padding: 1.75rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
@@ -524,6 +524,22 @@ body {
     margin-bottom: 0.25rem;
 }
 
+.academic-details {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.achievement-highlight, .focus-areas {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.achievement-highlight strong, .focus-areas strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
 
 /* Achievements Section */
 .achievements-section h4 {
@@ -574,11 +590,11 @@ body {
     align-items: center;
     justify-content: center;
     height: 100%;
-    padding: 2rem;
+    padding: 1.5rem;
 }
 
 .fullerton-logo-modern {
-    max-width: 100%;
+    max-width: 65%;
     height: auto;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
     transition: transform 0.3s ease;
@@ -657,6 +673,28 @@ body {
 
     .achievements-grid {
         grid-template-columns: 1fr;
+    }
+
+    .education-main-card {
+        padding: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .university-logo-container {
+        padding: 1rem;
+    }
+
+    .fullerton-logo-modern {
+        max-width: 80%;
+    }
+
+    .academic-details {
+        padding-top: 0.5rem;
+    }
+
+    .achievement-highlight, .focus-areas {
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
     }
 
     .coursework-tags {
