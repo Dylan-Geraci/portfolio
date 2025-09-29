@@ -43,7 +43,7 @@
             <a class="nav-link" href="#home">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="#aboutmescroll">About</a>
+            <a class="nav-link" aria-current="page" href="#about">About</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#projects">Projects</a>
@@ -103,7 +103,7 @@
     </div>
     <!-- Text Animation -->
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
-    <div class="row d-flex justify-content-center typing-text-row" id="aboutmescroll">
+    <div class="row d-flex justify-content-center typing-text-row" id="landing-bottom">
       <div class="col typing-text-col">
         <h2><span class="auto-type text-primary"></span></h2>
       </div>
@@ -119,196 +119,113 @@
   </div>
 
   <!-- About Me -->
-  <div class="container" data-aos="fade-down" data-aos-delay="200" data-aos-duration="1000" id="aboutme">
-    <div class="row mb-2 gx-5 aboutme-title-row">
-      <div class="col">
-        <h4 class="about-title pt-2 mb-3">About Me</h4>
-        <p class="about-body">
-          I am a software engineer with experience building applications using a range of technologies and programming languages. I have a strong interest in AI/ML, backend development, and systems design. My passion is to create scalable, high-impact solutions that address real-world problems and develop software that not only meets user needs but also delivers long-term value through thoughtful and innovative design.
-        </p>
+  <div class="container" data-aos="fade-down" data-aos-delay="200" data-aos-duration="1000" id="about">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="section-title">About Me</h2>
       </div>
+    </div>
 
-      <div class="col" skill_tab>
-        <nav class="nav nav-pills d-flex justify-content-center row-cols-1 row-cols-lg-3" id="pills-tab" role="tablist">
-          <a class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" href="#pills-home" role="tab"
-            aria-controls="pills-home" aria-selected="true">Languages</a>
-          <a class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" href="#pills-profile" role="tab"
-            aria-controls="pills-profile" aria-selected="false">Tools</a>
-          <a class="nav-link" id="pills-disabled-tab" data-bs-toggle="pill" href="#pills-disabled" role="tab"
-            aria-controls="pills-disabled" tabindex="1" aria-disabled="false">Resume</a>
-        </nav>
-        <div class="tab-content" id="pills-tabContent">
-          <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-            <div class="container pt-3">
-              <div class="row row-cols-2 row-cols-lg-3 d-flex justify-content-center skill-languages">
-                <div class="col test-col">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 256 255">
-                    <defs>
-                      <linearGradient id="logosPython0" x1="12.959%" x2="79.639%" y1="12.039%" y2="78.201%">
-                        <stop offset="0%" stop-color="#387EB8"></stop>
-                        <stop offset="100%" stop-color="#366994"></stop>
-                      </linearGradient>
-                      <linearGradient id="logosPython1" x1="19.128%" x2="90.742%" y1="20.579%" y2="88.429%">
-                        <stop offset="0%" stop-color="#FFE052"></stop>
-                        <stop offset="100%" stop-color="#FFC331"></stop>
-                      </linearGradient>
-                    </defs>
-                    <path fill="url(#logosPython0)"
-                      d="M126.916.072c-64.832 0-60.784 28.115-60.784 28.115l.072 29.128h61.868v8.745H41.631S.145 61.355.145 126.77c0 65.417 36.21 63.097 36.21 63.097h21.61v-30.356s-1.165-36.21 35.632-36.21h61.362s34.475.557 34.475-33.319V33.97S194.67.072 126.916.072M92.802 19.66a11.12 11.12 0 0 1 11.13 11.13a11.12 11.12 0 0 1-11.13 11.13a11.12 11.12 0 0 1-11.13-11.13a11.12 11.12 0 0 1 11.13-11.13">
-                    </path>
-                    <path fill="url(#logosPython1)"
-                      d="M128.757 254.126c64.832 0 60.784-28.115 60.784-28.115l-.072-29.127H127.6v-8.745h86.441s41.486 4.705 41.486-60.712c0-65.416-36.21-63.096-36.21-63.096h-21.61v30.355s1.165 36.21-35.632 36.21h-61.362s-34.475-.557-34.475 33.32v56.013s-5.235 33.897 62.518 33.897m34.114-19.586a11.12 11.12 0 0 1-11.13-11.13a11.12 11.12 0 0 1 11.13-11.131a11.12 11.12 0 0 1 11.13 11.13a11.12 11.12 0 0 1-11.13 11.13">
-                    </path>
-                  </svg>
-                  <p>Python</p>
-                </div>
-                <div class="col">
-                  <img src="assets/css/images/icons8-java-48.png" alt="Java" width="40" height="40" style="object-fit: contain;" />
-                  <p>Java</p>
-                </div>
-                <div class="col">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 128 128">
-                    <path fill="#659AD3"
-                      d="M115.4 30.7L67.1 2.9c-.8-.5-1.9-.7-3.1-.7c-1.2 0-2.3.3-3.1.7l-48 27.9c-1.7 1-2.9 3.5-2.9 5.4v55.7c0 1.1.2 2.4 1 3.5l106.8-62c-.6-1.2-1.5-2.1-2.4-2.7">
-                    </path>
-                    <path fill="#03599C"
-                      d="M10.7 95.3c.5.8 1.2 1.5 1.9 1.9l48.2 27.9c.8.5 1.9.7 3.1.7c1.2 0 2.3-.3 3.1-.7l48-27.9c1.7-1 2.9-3.5 2.9-5.4V36.1c0-.9-.1-1.9-.6-2.8z">
-                    </path>
-                    <path fill="#fff"
-                      d="M85.3 76.1C81.1 83.5 73.1 88.5 64 88.5c-13.5 0-24.5-11-24.5-24.5s11-24.5 24.5-24.5c9.1 0 17.1 5 21.3 12.5l13-7.5c-6.8-11.9-19.6-20-34.3-20c-21.8 0-39.5 17.7-39.5 39.5s17.7 39.5 39.5 39.5c14.6 0 27.4-8 34.2-19.8z">
-                    </path>
-                  </svg>
-                  <p>C</p>
-                </div>
-                <div class="col">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 256 288">
-                    <path fill="#649AD2"
-                      d="M255.987 84.59c-.002-4.837-1.037-9.112-3.13-12.781c-2.054-3.608-5.133-6.632-9.261-9.023c-34.08-19.651-68.195-39.242-102.264-58.913c-9.185-5.303-18.09-5.11-27.208.27c-13.565 8-81.48 46.91-101.719 58.632C4.071 67.6.015 74.984.013 84.58C0 124.101.013 163.62 0 203.141c0 4.73.993 8.923 2.993 12.537c2.056 3.717 5.177 6.824 9.401 9.269c20.24 11.722 88.164 50.63 101.726 58.631c9.121 5.382 18.027 5.575 27.215.27c34.07-19.672 68.186-39.262 102.272-58.913c4.224-2.444 7.345-5.553 9.401-9.267c1.997-3.614 2.992-7.806 2.992-12.539c0 0 0-79.018-.013-118.539">
-                    </path>
-                    <path fill="#004482"
-                      d="m128.392 143.476l-125.4 72.202c2.057 3.717 5.178 6.824 9.402 9.269c20.24 11.722 88.164 50.63 101.726 58.631c9.121 5.382 18.027 5.575 27.215.27c34.07-19.672 68.186-39.262 102.272-58.913c4.224-2.444 7.345-5.553 9.401-9.267z">
-                    </path>
-                    <path fill="#1A4674"
-                      d="M91.25 164.863c7.297 12.738 21.014 21.33 36.75 21.33c15.833 0 29.628-8.7 36.888-21.576l-36.496-21.141z">
-                    </path>
-                    <path fill="#01589C"
-                      d="M255.987 84.59c-.002-4.837-1.037-9.112-3.13-12.781l-124.465 71.667l124.616 72.192c1.997-3.614 2.99-7.806 2.992-12.539c0 0 0-79.018-.013-118.539">
-                    </path>
-                    <path fill="#FFF"
-                      d="M249.135 148.636h-9.738v9.74h-9.74v-9.74h-9.737V138.9h9.737v-9.738h9.74v9.738h9.738zM128 58.847c31.135 0 58.358 16.74 73.17 41.709l.444.759l-37.001 21.307c-7.333-12.609-20.978-21.094-36.613-21.094c-23.38 0-42.333 18.953-42.333 42.332a42.13 42.13 0 0 0 5.583 21.003c7.297 12.738 21.014 21.33 36.75 21.33c15.659 0 29.325-8.51 36.647-21.153l.241-.423l36.947 21.406c-14.65 25.597-42.228 42.851-73.835 42.851c-31.549 0-59.084-17.185-73.754-42.707c-7.162-12.459-11.26-26.904-11.26-42.307c0-46.95 38.061-85.013 85.014-85.013m75.865 70.314v9.738h9.737v9.737h-9.737v9.74h-9.738v-9.74h-9.738V138.9h9.738v-9.738z">
-                    </path>
-                  </svg>
-                  <p>C++</p>
-                </div>
+    <!-- Main About Card -->
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-10">
+        <div class="about-main-card">
+          <div class="about-content">
+            <p class="about-intro">
+              Hi, Im Dylan — a Computer Science student at Cal State Fullerton passionate about creating innovative solutions with real-world impact. 
+              I focus on building projects that transform complex challenges into practical, user-focused applications. 
+              With a strong background in software development and emerging technologies, I am driven to keep learning and expanding what I can build.
+            </p>
 
-                <div class="col">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 256 256">
-                    <g fill="none">
-                      <rect width="256" height="256" fill="#F0DB4F" rx="60"></rect>
-                      <path fill="#323330"
-                        d="m67.312 213.932l19.59-11.856c3.78 6.701 7.218 12.371 15.465 12.371c7.905 0 12.889-3.092 12.889-15.12v-81.798h24.058v82.138c0 24.917-14.606 36.259-35.916 36.259c-19.245 0-30.416-9.967-36.087-21.996m85.07-2.576l19.588-11.341c5.157 8.421 11.859 14.607 23.715 14.607c9.969 0 16.325-4.984 16.325-11.858c0-8.248-6.53-11.17-17.528-15.98l-6.013-2.579c-17.357-7.388-28.871-16.668-28.871-36.258c0-18.044 13.748-31.792 35.229-31.792c15.294 0 26.292 5.328 34.196 19.247l-18.731 12.029c-4.125-7.389-8.591-10.31-15.465-10.31c-7.046 0-11.514 4.468-11.514 10.31c0 7.217 4.468 10.139 14.778 14.608l6.014 2.577c20.449 8.765 31.963 17.699 31.963 37.804c0 21.654-17.012 33.51-39.867 33.51c-22.339 0-36.774-10.654-43.819-24.574">
-                      </path>
-                    </g>
-                  </svg>
-                  <p>JavaScript</p>
+            <div class="about-highlights">
+              <div class="highlight-item">
+                <div class="highlight-icon">🚀</div>
+                <div class="highlight-text">
+                  <h4>Real-World Impact</h4>
+                  <p>Built <strong>ParkSafe-LA</strong>, a machine learning system analyzing 23+ million parking citations to help drivers avoid tickets — deployed and actively used by the community.</p>
+                </div>
+              </div>
+
+              <div class="highlight-item">
+                <div class="highlight-icon">🎯</div>
+                <div class="highlight-text">
+                  <h4>Technical Focus</h4>
+                  <p>Specializing in <strong>AI/ML</strong>, <strong>full-stack development</strong>, and <strong>data science</strong>. I love turning complex problems into elegant, scalable solutions.</p>
+                </div>
+              </div>
+
+              <div class="highlight-item">
+                <div class="highlight-icon">📚</div>
+                <div class="highlight-text">
+                  <h4>Continuous Learning</h4>
+                  <p>Hands-on experience in Python, C++, React, and Cloud Infrastructures. Always exploring and willing to learn new technologies and methodologies to stay at the forefront of software development.</p>
                 </div>
               </div>
             </div>
           </div>
-          <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
-            <div class="container pt-3">
-              <div class="row row-cols-2 row-cols-lg-3 d-flex justify-content-center skill-languages">
-                <div class="col test-col">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 16 16" id="github">
-                    <path fill="#5C6BC0"
-                      d="M7.999 0C3.582 0 0 3.596 0 8.032a8.031 8.031 0 0 0 5.472 7.621c.4.074.546-.174.546-.387 0-.191-.007-.696-.011-1.366-2.225.485-2.695-1.077-2.695-1.077-.363-.928-.888-1.175-.888-1.175-.727-.498.054-.488.054-.488.803.057 1.225.828 1.225.828.714 1.227 1.873.873 2.329.667.072-.519.279-.873.508-1.074-1.776-.203-3.644-.892-3.644-3.969 0-.877.312-1.594.824-2.156-.083-.203-.357-1.02.078-2.125 0 0 .672-.216 2.2.823a7.633 7.633 0 0 1 2.003-.27 7.65 7.65 0 0 1 2.003.271c1.527-1.039 2.198-.823 2.198-.823.436 1.106.162 1.922.08 2.125.513.562.822 1.279.822 2.156 0 3.085-1.87 3.764-3.652 3.963.287.248.543.738.543 1.487 0 1.074-.01 1.94-.01 2.203 0 .215.144.465.55.386A8.032 8.032 0 0 0 16 8c0-4.42-3.58-8-8-8" />
-                  </svg>
-                  <p>GitHub</p>
-                </div>
-                <div class="col">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 128 128">
-                    <path fill="#F34F29"
-                      d="M124.737 58.378L69.621 3.264c-3.172-3.174-8.32-3.174-11.497 0L46.68 14.71l14.518 14.518c3.375-1.139 7.243-.375 9.932 2.314c2.703 2.706 3.461 6.607 2.294 9.993l13.992 13.993c3.385-1.167 7.292-.413 9.994 2.295c3.78 3.777 3.78 9.9 0 13.679a9.673 9.673 0 0 1-13.683 0a9.677 9.677 0 0 1-2.105-10.521L68.574 47.933l-.002 34.341a9.708 9.708 0 0 1 2.559 1.828c3.778 3.777 3.778 9.898 0 13.683c-3.779 3.777-9.904 3.777-13.679 0c-3.778-3.784-3.778-9.905 0-13.683a9.65 9.65 0 0 1 3.167-2.11V47.333a9.581 9.581 0 0 1-3.167-2.111c-2.862-2.86-3.551-7.06-2.083-10.576L41.056 20.333L3.264 58.123a8.133 8.133 0 0 0 0 11.5l55.117 55.114c3.174 3.174 8.32 3.174 11.499 0l54.858-54.858a8.135 8.135 0 0 0-.001-11.501">
-                    </path>
-                  </svg>
-                  <p>Git</p>
-                </div>
-                <div class="col">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 128 128">
-                    <mask id="deviconVscode0" width="128" height="128" x="0" y="0" maskUnits="userSpaceOnUse"
-                      style="mask-type:alpha">
-                      <path fill="#fff" fill-rule="evenodd"
-                        d="M90.767 127.126a7.968 7.968 0 0 0 6.35-.244l26.353-12.681a8 8 0 0 0 4.53-7.209V21.009a8 8 0 0 0-4.53-7.21L97.117 1.12a7.97 7.97 0 0 0-9.093 1.548l-50.45 46.026L15.6 32.013a5.328 5.328 0 0 0-6.807.302l-7.048 6.411a5.335 5.335 0 0 0-.006 7.888L20.796 64L1.74 81.387a5.336 5.336 0 0 0 .006 7.887l7.048 6.411a5.327 5.327 0 0 0 6.807.303l21.974-16.68l50.45 46.025a7.96 7.96 0 0 0 2.743 1.793Zm5.252-92.183L57.74 64l38.28 29.058V34.943Z"
-                        clip-rule="evenodd"></path>
-                    </mask>
-                    <g mask="url(#deviconVscode0)">
-                      <path fill="#0065A9"
-                        d="M123.471 13.82L97.097 1.12A7.973 7.973 0 0 0 88 2.668L1.662 81.387a5.333 5.333 0 0 0 .006 7.887l7.052 6.411a5.333 5.333 0 0 0 6.811.303l103.971-78.875c3.488-2.646 8.498-.158 8.498 4.22v-.306a8.001 8.001 0 0 0-4.529-7.208Z">
-                      </path>
-                      <g filter="url(#deviconVscode1)">
-                        <path fill="#007ACC"
-                          d="m123.471 114.181l-26.374 12.698A7.973 7.973 0 0 1 88 125.333L1.662 46.613a5.333 5.333 0 0 1 .006-7.887l7.052-6.411a5.333 5.333 0 0 1 6.811-.303l103.971 78.874c3.488 2.647 8.498.159 8.498-4.219v.306a8.001 8.001 0 0 1-4.529 7.208">
-                        </path>
-                      </g>
-                      <g filter="url(#deviconVscode2)">
-                        <path fill="#1F9CF0"
-                          d="M97.098 126.882A7.977 7.977 0 0 1 88 125.333c2.952 2.952 8 .861 8-3.314V5.98c0-4.175-5.048-6.266-8-3.313a7.977 7.977 0 0 1 9.098-1.549L123.467 13.8A8 8 0 0 1 128 21.01v85.982a8 8 0 0 1-4.533 7.21z">
-                        </path>
-                      </g>
-                      <g filter="url(#deviconVscode3)" fill-rule="evenodd"
-                        d="M90.69 127.126a7.968 7.968 0 0 0 6.349-.244l26.353-12.681a8 8 0 0 0 4.53-7.21V21.009a8 8 0 0 0-4.53-7.21L97.039 1.12a7.97 7.97 0 0 0-9.093 1.548l-50.45 46.026l-21.974-16.68a5.328 5.328 0 0 0-6.807.302l-7.048 6.411a5.336 5.336 0 0 0-.006 7.888L20.718 64L1.662 81.386a5.335 5.335 0 0 0 .006 7.888l7.048 6.411a5.328 5.328 0 0 0 6.807.303l21.975-16.681l50.45 46.026a7.959 7.959 0 0 0 2.742 1.793m5.252-92.184L57.662 64l38.28 29.057z"
-                        clip-rule="evenodd" opacity=".25"></path>
-                    </g>
-                    <defs>
-                      <filter id="deviconVscode1" width="144.744" height="113.408" x="-8.411" y="22.594"
-                        color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
-                        <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
-                        <feColorMatrix in="SourceAlpha" result="hardAlpha"
-                          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"></feColorMatrix>
-                        <feOffset></feOffset>
-                        <feGaussianBlur stdDeviation="4.167"></feGaussianBlur>
-                        <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"></feColorMatrix>
-                        <feBlend in2="BackgroundImageFix" mode="overlay" result="effect1_dropShadow_1_36"></feBlend>
-                        <feBlend in="SourceGraphic" in2="effect1_dropShadow_1_36" result="shape"></feBlend>
-                      </filter>
-                      <filter id="deviconVscode2" width="56.667" height="144.007" x="79.667" y="-8.004"
-                        color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
-                        <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
-                        <feColorMatrix in="SourceAlpha" result="hardAlpha"
-                          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"></feColorMatrix>
-                        <feOffset></feOffset>
-                        <feGaussianBlur stdDeviation="4.167"></feGaussianBlur>
-                        <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"></feColorMatrix>
-                        <feBlend in2="BackgroundImageFix" mode="overlay" result="effect1_dropShadow_1_36"></feBlend>
-                        <feBlend in="SourceGraphic" in2="effect1_dropShadow_1_36" result="shape"></feBlend>
-                      </filter>
-                      <linearGradient id="deviconVscode3" x1="63.922" x2="63.922" y1=".33" y2="127.67"
-                        gradientUnits="userSpaceOnUse">
-                        <stop stop-color="#fff"></stop>
-                        <stop offset="1" stop-color="#fff" stop-opacity="0"></stop>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  <p>VS Code</p>
-                </div>
-                <div class="col">
-                  <img src="images/Amazon_Web_Services_Logo.svg.png" alt="AWS" width="40" height="40" style="object-fit: contain;" />
-                  <p>AWS</p>
-                </div>
-                <div class="col">
-                  <img src="images/sqlite-svgrepo-com.svg" alt="SQLite" width="40" height="40" style="object-fit: contain;" />
-                  <p>SQLite</p>
-                </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills Section -->
+    <div class="row">
+      <div class="col-12">
+        <div class="skills-section">
+          <div class="skills-header text-center mb-4">
+            <h4>Technical Skills</h4>
+          </div>
+
+          <div class="skills-categories">
+            <!-- Programming Languages -->
+            <div class="skill-category">
+              <h5 class="skill-category-title">Languages</h5>
+              <div class="skill-tags">
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">TypeScript</span>
+                <span class="skill-tag">C++</span>
+                <span class="skill-tag">Java</span>
+                <span class="skill-tag">SQL</span>
+                <span class="skill-tag">HTML/CSS</span>
+                <span class="skill-tag">R</span>
               </div>
             </div>
-          </div>
-          <div class="tab-pane fade d-flex flex-column justify-content-center text-center p-0 pt-3 p-sm-4"
-            id="pills-disabled" role="tabpanel" aria-labelledby="pills-disabled-tab">
-            <div class="container d-flex justify-content-center">
-              <div class="row resume-section">
-                <a type="button" class="btn btn-secondary" href="images/Resume_DylanGeraci.pdf" target="_blank">
-                  View My Resume
-                </a>
+
+            <!-- Frameworks & Tools -->
+            <div class="skill-category">
+              <h5 class="skill-category-title">Frameworks & Libraries</h5>
+              <div class="skill-tags">
+                <span class="skill-tag">React</span>
+                <span class="skill-tag">Next.js</span>
+                <span class="skill-tag">Flask</span>
+                <span class="skill-tag">FastAPI</span>
+                <span class="skill-tag">TensorFlow</span>
+                <span class="skill-tag">PyTorch</span>
+                <span class="skill-tag">Node.js</span>
+              </div>
+            </div>
+
+            <!-- Tools & Development -->
+            <div class="skill-category">
+              <h5 class="skill-category-title">Tools & Development</h5>
+              <div class="skill-tags">
+                <span class="skill-tag">Git</span>
+                <span class="skill-tag">Docker</span>
+                <span class="skill-tag">PostgreSQL</span>
+                <span class="skill-tag">MongoDB</span>
+                <span class="skill-tag">VS Code</span>
+                <span class="skill-tag">Jupyter</span>
+              </div>
+            </div>
+
+            <!-- Cloud & Infrastructure -->
+            <div class="skill-category">
+              <h5 class="skill-category-title">Cloud & Infrastructure</h5>
+              <div class="skill-tags">
+                <span class="skill-tag">AWS</span>
+                <span class="skill-tag">Google Cloud</span>
+                <span class="skill-tag">Azure</span>
+                <span class="skill-tag">Kubernetes</span>
               </div>
             </div>
           </div>
@@ -415,7 +332,7 @@
               <p class="graduation">Expected Graduation: May 2026</p>
               <div class="academic-details mt-3">
                 <p class="achievement-highlight"><strong>Academic Standing:</strong> Dean's List Recipient</p>
-                <p class="focus-areas"><strong>Focus Areas:</strong> Full-Stack Software Engineering, Machine Learning, Data Science</p>
+                <p class="focus-areas"><strong>Focus Areas:</strong> Full-Stack Software Development, Machine Learning, Data Science</p>
               </div>
             </div>
           </div>
