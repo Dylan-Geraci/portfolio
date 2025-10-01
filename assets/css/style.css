@@ -316,49 +316,73 @@ body {
     transform: translateY(-1px);
 }
 
-/* Resume Link Styling */
-.resume-link-container {
-    margin: 1.5rem 0;
-    padding: 1rem 0;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
+/* Resume Button Styling */
+.resume-button-container {
+    margin: 2rem 0;
 }
 
-.resume-link {
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 1rem;
-    font-weight: 500;
+.resume-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.resume-link:hover {
-    color: var(--primary-color);
-    background: var(--bg-primary);
-    transform: translateY(-1px);
+    gap: 0.75rem;
+    padding: 0.9rem 2rem;
+    background: var(--primary-color);
+    color: white;
     text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    border: 2px solid var(--primary-color);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
 }
 
-.resume-link::after {
+.resume-btn::before {
     content: '';
     position: absolute;
-    bottom: 0;
+    top: 50%;
     left: 50%;
     width: 0;
-    height: 1px;
-    background: var(--primary-color);
-    transition: all 0.3s ease;
-    transform: translateX(-50%);
+    height: 0;
+    border-radius: 50%;
+    background: var(--accent-color);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s ease, height 0.5s ease;
+    z-index: 0;
 }
 
-.resume-link:hover::after {
-    width: 80%;
+.resume-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.resume-btn svg,
+.resume-btn span {
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease;
+}
+
+.resume-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.resume-btn:hover svg.bi-arrow-right {
+    transform: translateX(5px);
+}
+
+/* Dark mode resume button */
+[data-bs-theme="dark"] .resume-btn {
+    color: #0a0a0a;
+}
+
+[data-bs-theme="dark"] .resume-btn:hover {
+    color: white;
 }
 
 /* Responsive Design for About Section */
