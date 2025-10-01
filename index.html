@@ -138,7 +138,7 @@
             </p>
 
             <div class="resume-button-container text-center my-4">
-              <a href="resume.pdf" target="_blank" class="resume-btn">
+              <a href="images/Resume_DylanGeraci.pdf" target="_blank" class="resume-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
                   <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5"/>
                   <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
@@ -302,12 +302,18 @@
       </div>
       <div class="col-lg-4 col-md-6">
         <div class="project-card">
-          <h3>Database System</h3>
-          <p>Optimized database design and implementation for scalable applications.</p>
+          <div class="project-image">
+            <img src="images/migration_picture.png" alt="Cloud Infrastructure Migration" class="migration-image">
+          </div>
+          <h3>Cloud Infrastructure Migration</h3>
+          <p>Led enterprise VM migration to Azure with CI/CD automation. Improved deployment success rate by 55% through optimized pipelines and reduced setup time by 40% with Azure CLI scripting.</p>
           <div class="project-tags">
-            <span class="tag">SQL</span>
-            <span class="tag">Java</span>
-            <span class="tag">AWS</span>
+            <span class="tag">Azure</span>
+            <span class="tag">Linux</span>
+            <span class="tag">CI/CD</span>
+            <span class="tag">Azure CLI</span>
+            <span class="tag">DevOps</span>
+            <span class="tag">Cloud Architecture</span>
           </div>
         </div>
       </div>
@@ -379,11 +385,13 @@
             <span class="course-tag">Software Engineering</span>
             <span class="course-tag">Database Systems</span>
             <span class="course-tag">Machine Learning</span>
-            <span class="course-tag">Web Development</span>
+            <span class="course-tag">Back-end Web Development</span>
             <span class="course-tag">Operating Systems</span>
             <span class="course-tag">Object-Oriented Programming</span>
             <span class="course-tag">Natural Language Processing</span>
             <span class="course-tag">Artificial Intelligence</span>
+            <span class="course-tag">Data Science/Big Data</span>
+            <span class="course-tag">Applied Statistics</span>
           </div>
         </div>
       </div>
@@ -428,6 +436,18 @@
       </div>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer-text">© <span id="year"></span> Dylan Geraci. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Set current year dynamically
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script>

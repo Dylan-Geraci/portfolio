@@ -489,6 +489,10 @@ body {
     transition: transform 0.3s ease;
 }
 
+.migration-image {
+    object-position: 10% center;
+}
+
 .project-image:hover img {
     transform: scale(1.05);
 }
@@ -933,6 +937,22 @@ body {
 #row-icon {
     width: 80%;
 }
+}
+
+/* Footer */
+.footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: 2rem 0;
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.footer-text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+    font-weight: 400;
 }
 
 .card {
