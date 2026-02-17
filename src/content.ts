@@ -115,10 +115,18 @@ export const projects: ProjectEntry[] = [
       "Offline-first AI-powered memory companion for caregivers supporting individuals with dementia and Alzheimer's. Features audio transcription, event summarization, and secure encrypted local storage.",
     tags: ["Python", "FastAPI", "Next.js", "Tailwind CSS", "SQLite", "LLM Integration"],
     image: "/images/carelink_picture.png",
-    imagePosition: "center 75%",
+    imagePosition: "center 18%",
     links: [
-      { label: "Source Code", url: "https://github.com/amirValiulla32/Carelink" },
+      { label: "Source Code", url: "https://github.com/Dylan-Geraci/Carelink" },
     ],
+  },
+  {
+    title: "WISE Reflect",
+    description:
+      "Chrome extension that guides students through structured reflection and delivers AI-generated feedback via a secure Node.js backend proxy, protecting API keys while storing responses locally and logging anonymized usage.",
+    tags: ["JavaScript", "Node.js", "Chrome Extensions", "OpenAI API", "SQLite", "Full-Stack"],
+    image: "/images/WISE_AI_pic.png",
+    links: [],
   },
   // {
   //   title: "Cloud Infrastructure Migration",
