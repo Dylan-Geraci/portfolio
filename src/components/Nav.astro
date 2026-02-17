@@ -1,0 +1,64 @@
+---
+import ThemeToggle from "./ThemeToggle.astro";
+import { sections, meta } from "../content";
+---
+
+<header class="nav" role="banner">
+  <nav class="nav-inner" aria-label="Main navigation">
+    <a href="#" class="nav-logo">{meta.name}</a>
+
+    <div class="nav-links" id="nav-links">
+      {sections.map((s) => (
+        <a href={`#${s.id}`} class="nav-link" data-section={s.id}>
+          {s.label}
+        </a>
+      ))}
+    </div>
+
+    <div class="nav-right">
+      <ThemeToggle />
+      <button
+        class="hamburger"
+        id="hamburger"
+        type="button"
+        aria-label="Open menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<!-- Mobile overlay -->
+<div class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+  {sections.map((s) => (
+    <a href={`#${s.id}`} class="mobile-nav-link" data-section={s.id}>
+      {s.label}
+    </a>
+  ))}
+</div>
+
+<script>
+  const hamburger = document.getElementById("hamburger")!;
+  const mobileNav = document.getElementById("mobile-nav")!;
+
+  hamburger.addEventListener("click", () => {
+    const isOpen = hamburger.classList.toggle("open");
+    mobileNav.classList.toggle("open", isOpen);
+    hamburger.setAttribute("aria-expanded", String(isOpen));
+    document.body.style.overflow = isOpen ? "hidden" : "";
+  });
+
+  // Close mobile nav on link click
+  mobileNav.querySelectorAll(".mobile-nav-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      hamburger.classList.remove("open");
+      mobileNav.classList.remove("open");
+      hamburger.setAttribute("aria-expanded", "false");
+      document.body.style.overflow = "";
+    });
+  });
+</script>

@@ -1,0 +1,33 @@
+---
+import SectionLabel from "./SectionLabel.astro";
+import ExperienceItem from "./ExperienceItem.astro";
+import { experience } from "../content";
+---
+
+<section class="site-container section" id="experience" aria-labelledby="experience-heading">
+  <div class="section-label-col">
+    <SectionLabel number="02" label="Experience" />
+  </div>
+  <div class="section-content">
+    <h2 id="experience-heading" class="sr-only">Experience</h2>
+    <div class="experience-list">
+      {experience.map((entry) => (
+        <ExperienceItem entry={entry} />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>

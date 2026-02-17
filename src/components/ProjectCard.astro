@@ -1,0 +1,34 @@
+---
+import TechChip from "./TechChip.astro";
+import type { ProjectEntry } from "../content";
+
+interface Props {
+  project: ProjectEntry;
+}
+
+const { project } = Astro.props;
+---
+
+<div class="project-card" data-tags={project.tags.join(",")}>
+  {project.image && (
+    <img src={project.image} alt={project.title} class="project-thumb" loading="lazy" style={project.imagePosition ? `object-position: ${project.imagePosition}` : undefined} />
+  )}
+  <div class="project-card-body">
+    <h3 class="project-title">{project.title}</h3>
+    <p class="project-desc">{project.description}</p>
+    {project.links.length > 0 && (
+      <div class="project-links">
+        {project.links.map((link) => (
+          <a href={link.url} target="_blank" rel="noopener noreferrer" class="project-link">
+            {link.label}
+          </a>
+        ))}
+      </div>
+    )}
+    <div class="chip-row">
+      {project.tags.map((tag) => (
+        <TechChip label={tag} />
+      ))}
+    </div>
+  </div>
+</div>

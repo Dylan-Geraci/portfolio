@@ -1,0 +1,52 @@
+---
+import SectionLabel from "./SectionLabel.astro";
+import TechChip from "./TechChip.astro";
+import { about, skills } from "../content";
+
+const categories = [
+  { title: "Languages", items: skills.languages },
+  { title: "Frameworks", items: skills.frameworks },
+  { title: "Tools", items: skills.tools },
+  { title: "Databases & Cloud", items: skills.infrastructure },
+];
+---
+
+<section class="site-container section" id="about" aria-labelledby="about-heading">
+  <div class="section-label-col">
+    <SectionLabel number="01" label="About" />
+  </div>
+  <div class="section-content">
+    <h2 id="about-heading" class="sr-only">About</h2>
+    <p class="bio">{about.bio}</p>
+    <p class="education-line">
+      <strong>{about.education.degree}</strong>, {about.education.school} — {about.education.gpa} GPA, {about.education.graduation}
+    </p>
+
+    <div class="skills-grid" style="margin-top: 2rem;">
+      {categories.map((cat) => (
+        <div>
+          <h3 class="skills-category-title">{cat.title}</h3>
+          <div class="chip-row">
+            {cat.items.map((item) => (
+              <TechChip label={item} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>

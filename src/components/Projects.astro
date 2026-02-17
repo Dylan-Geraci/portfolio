@@ -1,0 +1,46 @@
+---
+import SectionLabel from "./SectionLabel.astro";
+import ProjectCard from "./ProjectCard.astro";
+import { projects } from "../content";
+
+// Collect unique tags
+const allTags = [...new Set(projects.flatMap((p) => p.tags))];
+---
+
+<section class="site-container section" id="projects" aria-labelledby="projects-heading">
+  <div class="section-label-col">
+    <SectionLabel number="03" label="Projects" />
+  </div>
+  <div class="section-content">
+    <h2 id="projects-heading" class="sr-only">Projects</h2>
+
+    <div class="filter-row" id="project-filters">
+      <button class="filter-chip active" data-filter="all">All</button>
+      {allTags.map((tag) => (
+        <button class="filter-chip" data-filter={tag}>
+          {tag}
+        </button>
+      ))}
+    </div>
+
+    <div class="projects-list" id="projects-list">
+      {projects.map((project) => (
+        <ProjectCard project={project} />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>

@@ -1,0 +1,27 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import Hero from "../components/Hero.astro";
+import About from "../components/About.astro";
+import Experience from "../components/Experience.astro";
+import Projects from "../components/Projects.astro";
+import Contact from "../components/Contact.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Base title="Dylan Geraci — Software Engineer & AI/ML Enthusiast">
+  <Nav />
+  <main id="main-content" style={`padding-top: var(--nav-height);`}>
+    <Hero />
+    <About />
+    <Experience />
+    <Projects />
+    <Contact />
+  </main>
+  <Footer />
+
+  <script src="../scripts/theme.ts"></script>
+  <script src="../scripts/scroll.ts"></script>
+  <script src="../scripts/contact.ts"></script>
+  <script src="../scripts/project-filter.ts"></script>
+</Base>

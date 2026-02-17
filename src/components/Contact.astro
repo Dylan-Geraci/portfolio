@@ -1,0 +1,45 @@
+---
+import SectionLabel from "./SectionLabel.astro";
+import { meta } from "../content";
+---
+
+<section class="site-container section" id="contact" aria-labelledby="contact-heading">
+  <div class="section-label-col">
+    <SectionLabel number="04" label="Contact" />
+  </div>
+  <div class="section-content">
+    <h2 id="contact-heading" class="sr-only">Contact</h2>
+    <div class="contact-links">
+      <div class="contact-row">
+        <span class="email-display" id="email-text">{meta.email}</span>
+        <button class="copy-btn" id="copy-email" type="button" aria-label="Copy email address">
+          Copy
+        </button>
+      </div>
+      <div class="contact-row">
+        <a href={meta.linkedin} target="_blank" rel="noopener noreferrer" class="contact-text-link">
+          LinkedIn
+        </a>
+      </div>
+      <div class="contact-row">
+        <a href={meta.github} target="_blank" rel="noopener noreferrer" class="contact-text-link">
+          GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>

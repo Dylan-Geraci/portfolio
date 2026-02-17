@@ -1,0 +1,52 @@
+---
+import "../styles/global.css";
+import "../styles/layout.css";
+import "../styles/components.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Dylan Geraci — Software Engineer & AI/ML Enthusiast" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=DM+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23C45D3E'/><text x='50%25' y='50%25' font-family='serif' font-size='18' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='central'>DG</text></svg>"
+    />
+
+    <!-- Inline theme script: runs synchronously to prevent flash -->
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        if (stored) {
+          document.documentElement.setAttribute("data-theme", stored);
+        } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+    <div class="scroll-progress" id="scroll-progress"></div>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,30 @@
+---
+import { meta, about } from "../content";
+---
+
+<section class="site-container hero" aria-label="Introduction">
+  <div class="hero-text">
+    <h1>{meta.name}</h1>
+    <p class="hero-subtitle">{about.headline}</p>
+    <div class="hero-actions">
+      <a href={meta.resumePath} target="_blank" rel="noopener noreferrer" class="btn-primary">
+        Resume
+      </a>
+      <a href={meta.linkedin} target="_blank" rel="noopener noreferrer" class="hero-link">
+        LinkedIn
+      </a>
+      <a href={meta.github} target="_blank" rel="noopener noreferrer" class="hero-link">
+        GitHub
+      </a>
+    </div>
+  </div>
+  <div class="hero-headshot-wrapper">
+    <img
+      src={meta.headshotPath}
+      alt={meta.name}
+      class="hero-headshot"
+      width="220"
+      height="220"
+    />
+  </div>
+</section>

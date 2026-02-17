@@ -1,0 +1,32 @@
+---
+import TechChip from "./TechChip.astro";
+import type { ExperienceEntry } from "../content";
+
+interface Props {
+  entry: ExperienceEntry;
+}
+
+const { entry } = Astro.props;
+---
+
+<div class="experience-item">
+  <div class="exp-header">
+    <h3 class="exp-role">{entry.role}</h3>
+    <div class="exp-meta">
+      {entry.companyUrl ? (
+        <a href={entry.companyUrl} target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">
+          {entry.company}
+        </a>
+      ) : (
+        <span class="exp-company">{entry.company}</span>
+      )}
+      <span class="exp-date">· {entry.date}</span>
+    </div>
+  </div>
+  <p class="exp-summary">{entry.summary}</p>
+  <div class="chip-row">
+    {entry.tags.map((tag) => (
+      <TechChip label={tag} />
+    ))}
+  </div>
+</div>
