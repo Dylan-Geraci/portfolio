@@ -37,6 +37,14 @@ export const experience: ExperienceEntry[] = [
     tags: ["Python", "FastAPI", "MongoDB", "AI/ML", "REST APIs", "WebSockets"],
   },
   {
+    role: "Research Assistant",
+    company: "Dr. Anand Panangadan — CSUF",
+    companyUrl: "https://www.fullerton.edu/ecs/faculty/apanangadan/",
+    date: "Nov 2025 — Present",
+    summary: "Contributing to a Smart Cooking Assistant for low-income households, using a Raspberry Pi 5 with a Sony IMX500 AI Camera to detect critical cooking events in real time, such as water about to boil over or smoke, via computer vision and ML-based scene analysis. Integrating thermal imaging to enhance hazard detection alongside standard video feeds.",
+    tags: ["Python", "Raspberry Pi", "Computer Vision", "AI/ML", "Embedded Systems", "Thermal Imaging"],
+  },
+  {
     role: "Software Engineer Intern",
     company: "Yembo",
     companyUrl: "https://www.emit-light.com/lightwall",
