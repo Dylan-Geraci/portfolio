@@ -41,7 +41,7 @@ export const experience: ExperienceEntry[] = [
     company: "Dr. Anand Panangadan — CSUF",
     companyUrl: "https://www.fullerton.edu/ecs/faculty/apanangadan/",
     date: "Nov 2025 — Present",
-    summary: "Contributing to a Smart Cooking Assistant for low-income households, using a Raspberry Pi 5 with an AI HAT+ and AI Camera to detect critical cooking events in real time, such as water about to boil over or smoke, via computer vision and ML-based scene analysis. Integrating thermal imaging to enhance hazard detection alongside standard video feeds.",
+    summary: "Contributed to a real-time smart cooking assistant for low-income supportive housing — a multi-semester research project deploying a fine-tuned YOLOv11s model on a Raspberry Pi 5 with an AI HAT+ NPU for edge-based cooking state detection. The system uses a custom dataset of 1,300+ labeled images, temporal majority-vote stabilization, and async API integration to guide residents step-by-step through recipes via computer vision.",
     tags: ["Python", "Raspberry Pi", "Computer Vision", "AI/ML", "Embedded Systems", "Thermal Imaging"],
   },
   {
