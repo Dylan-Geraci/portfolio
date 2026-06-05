@@ -3,8 +3,8 @@ export const meta = {
   email: "dylangeraci.dev@gmail.com",
   linkedin: "https://www.linkedin.com/in/dylangeraci/",
   github: "https://github.com/Dylan-Geraci",
-  resumePath: "/images/Resume_DylanGeraci.pdf",
-  headshotPath: "/images/headshot_first.jpeg",
+  resumePath: "/images/Resume_DylanGeraci_may.pdf",
+  headshotPath: "/images/grad-pic-zoomed.jpeg",
   siteUrl: "https://dylangeraci.com",
 };
 
@@ -14,7 +14,7 @@ export const about = {
   education: {
     school: "California State University, Fullerton",
     degree: "B.S. Computer Science",
-    gpa: "3.97",
+    gpa: "3.98",
     graduation: "May 2026",
   },
 };
@@ -30,19 +30,36 @@ export interface ExperienceEntry {
 
 export const experience: ExperienceEntry[] = [
   {
+    role: "Software Engineer",
+    company: "Mindful Metrics",
+    companyUrl: "https://mindfulmetrics.cc/",
+    date: "May 2026 — Present",
+    summary: "Integrated Google GenAI SDK into a DTF marketplace to power intelligent technician-job matching. Refactored an e-commerce platform to FastAPI/React with Stripe and Shopify integration, supporting 1M+ items sold. Launched a logistics platform integrating CRM and ERP APIs with i18n support across English and Chinese.",
+    tags: ["Python", "FastAPI", "React.js", "Google GenAI", "Stripe", "REST APIs", "i18n"],
+  },
+  {
     role: "Software Engineer Intern",
     company: "Crete Robotics Solutions",
-    date: "Oct 2025 — Present",
-    summary: "Architecting a FastAPI backend with 30+ REST endpoints, real-time WebSocket messaging with JWT auth, and MongoDB persistence for an AI-powered task marketplace. Integrated Google Gemini AI for NLP-based query parsing to improve task matching accuracy.",
-    tags: ["Python", "FastAPI", "MongoDB", "AI/ML", "REST APIs", "WebSockets"],
+    companyUrl: "https://www.cretebot.ai/",
+    date: "Oct 2025 — May 2026",
+    summary: "Designed a RESTful API with 30+ endpoints supporting task matching and messaging. Implemented real-time WebSocket messaging with JWT authentication and MongoDB persistence. Established pytest unit tests maintaining 80% code coverage across all API endpoints.",
+    tags: ["Python", "FastAPI", "MongoDB", "REST APIs", "WebSockets", "Pytest"],
   },
   {
     role: "Research Assistant",
     company: "Dr. Anand Panangadan — CSUF",
     companyUrl: "https://www.fullerton.edu/ecs/faculty/apanangadan/",
-    date: "Nov 2025 — Present",
+    date: "Nov 2025 — May 2026",
     summary: "Contributed to a real-time smart cooking assistant for low-income supportive housing — a multi-semester research project deploying a fine-tuned YOLOv11s model on a Raspberry Pi 5 with an AI HAT+ NPU for edge-based cooking state detection. The system uses a custom dataset of 1,300+ labeled images, temporal majority-vote stabilization, and async API integration to guide residents step-by-step through recipes via computer vision.",
     tags: ["Python", "Raspberry Pi", "Computer Vision", "AI/ML", "Embedded Systems", "Thermal Imaging"],
+  },
+  {
+    role: "Peer Advisor",
+    company: "Project RAISE",
+    companyUrl: "https://www.fullerton.edu/projectraise/",
+    date: "Jul 2025 — May 2026",
+    summary: "Mentored 40+ STEM transfer students through 1-on-1 advising, technical guidance, and academic planning. Delivered technical presentations and workshops to 100+ students on software engineering and career development.",
+    tags: ["Mentoring", "Leadership", "STEM Education"],
   },
   {
     role: "Software Engineer Intern",
@@ -53,19 +70,11 @@ export const experience: ExperienceEntry[] = [
     tags: ["Python", "Embedded Systems", "Speech Recognition", "AI/ML", "whisper.cpp"],
   },
   {
-    role: "Peer Advisor",
-    company: "Project RAISE",
-    companyUrl: "https://www.fullerton.edu/projectraise/",
-    date: "Jul 2025 — Present",
-    summary: "Mentoring 40+ STEM transfer students through 1-on-1 advising, technical guidance, and academic planning. Delivering technical presentations and workshops to 100+ students on software engineering and career development.",
-    tags: ["Mentoring", "Leadership", "STEM Education"],
-  },
-  {
     role: "Artificial Intelligence Officer",
     company: "ACM",
     companyUrl: "https://acmcsuf.com",
-    date: "May 2025 — Present",
-    summary: "Serving as a board member for the AI Team, conducting Data Science and ML workshops for 35+ students covering feature engineering, model training, and evaluation. Increased workshop attendance by 50% by developing real-world programming demo applications.",
+    date: "May 2025 — May 2026",
+    summary: "Served as a board member for the AI Team, conducting Data Science and ML workshops for 35+ students covering feature engineering, model training, and evaluation. Increased workshop attendance by 50% by developing real-world programming demo applications.",
     tags: ["Technical Communication", "Project Planning", "AI/ML"],
   },
   {
@@ -147,10 +156,11 @@ export const projects: ProjectEntry[] = [
 ];
 
 export const skills = {
-  languages: ["Python", "JavaScript", "TypeScript", "C++", "Java", "SQL", "C", "HTML", "CSS", "R"],
-  frameworks: ["FastAPI", "React.js", "Next.js", "Node.js", "Express.js", "Django", "Flask", "Tailwind CSS"],
-  tools: ["Git", "Docker", "Kubernetes", "PyTorch", "TensorFlow", "Vercel", "Railway", "Supabase"],
-  infrastructure: ["PostgreSQL", "MongoDB", "MySQL", "SQLite", "AWS", "Google Cloud", "Azure", "Oracle Cloud", "Cloudflare"],
+  languages: ["Python", "JavaScript", "TypeScript", "C++", "Java", "Rust", "SQL", "HTML", "CSS"],
+  frameworks: ["FastAPI", "React.js", "Next.js", "Node.js", "Express.js", "Tailwind CSS"],
+  databases: ["PostgreSQL", "MongoDB", "MySQL", "SQLite"],
+  tools: ["Git", "Docker", "Kubernetes", "GitHub Actions", "PyTorch", "TensorFlow", "Jira", "Pytest"],
+  cloud: ["AWS", "Google Cloud", "Azure", "Cloudflare"],
 };
 
 export const sections = [
