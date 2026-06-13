@@ -3,7 +3,7 @@ export const meta = {
   email: "dylangeraci.dev@gmail.com",
   linkedin: "https://www.linkedin.com/in/dylangeraci/",
   github: "https://github.com/Dylan-Geraci",
-  resumePath: "/images/Resume_DylanGeraci_may.pdf",
+  resumePath: "/images/Resume_DylanGeraci_june.pdf",
   headshotPath: "/images/grad-pic-zoomed.jpeg",
   siteUrl: "https://dylangeraci.com",
 };
