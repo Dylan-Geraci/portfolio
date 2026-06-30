@@ -10,7 +10,7 @@ export const meta = {
 
 export const about = {
   headline: "Software Engineer & AI/ML Enthusiast",
-  bio: "Hi, I'm Dylan, a senior Computer Science student at Cal State Fullerton passionate about creating innovative solutions with real-world impact. I'm a growth-minded, full-stack software engineer with experience building apps and services across a wide range of languages and technologies. My enthusiasm lies in crafting software that turns complex problems into robust, scalable solutions — always learning, always building.",
+  bio: "Hi, I'm Dylan, a Software Engineer based in Southern California, recently graduated from Cal State Fullerton with a B.S. in Computer Science. I build full-stack systems and ML pipelines end-to-end, from APIs and databases to deployed models. Outside of work I stay active at the gym, play chess, and dive into as much new music as possible. Open to new grad SWE opportunities — feel free to reach out.",
   education: {
     school: "California State University, Fullerton",
     degree: "B.S. Computer Science",
