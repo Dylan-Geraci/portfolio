@@ -14,16 +14,16 @@ const categories = [
 
 <section class="site-container section" id="about" aria-labelledby="about-heading">
   <div class="section-label-col">
-    <SectionLabel number="01" label="About" />
+    <SectionLabel label="About" />
   </div>
   <div class="section-content">
     <h2 id="about-heading" class="sr-only">About</h2>
-    <p class="bio">{about.bio}</p>
-    <p class="education-line">
+    <p class="bio reveal">{about.bio}</p>
+    <p class="education-line reveal">
       <strong>{about.education.degree}</strong>, {about.education.school} — {about.education.gpa} GPA, {about.education.graduation}
     </p>
 
-    <div class="skills-grid" style="margin-top: 2rem;">
+    <div class="skills-grid reveal" style="margin-top: 2.5rem;">
       {categories.map((cat) => (
         <div>
           <h3 class="skills-category-title">{cat.title}</h3>

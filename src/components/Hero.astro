@@ -1,12 +1,36 @@
 ---
 import { meta, about } from "../content";
+
+const specs = [
+  { key: "based", value: "Southern California" },
+  { key: "focus", value: "Full-stack systems · ML pipelines" },
+];
 ---
 
 <section class="site-container hero" aria-label="Introduction">
   <div class="hero-text">
-    <h1>{meta.name}</h1>
-    <p class="hero-subtitle">{about.headline}</p>
-    <div class="hero-actions">
+    <p class="hero-eyebrow mono-label hero-enter" style="--i: 0">
+      Software Engineer
+    </p>
+    <h1 class="hero-name hero-enter" style="--i: 1">{meta.name}</h1>
+
+    <dl class="hero-specs hero-enter" style="--i: 2">
+      {specs.map((s) => (
+        <div class="hero-spec-row">
+          <dt class="hero-spec-key">{s.key}</dt>
+          <dd class="hero-spec-val">{s.value}</dd>
+        </div>
+      ))}
+      <div class="hero-spec-row">
+        <dt class="hero-spec-key">status</dt>
+        <dd class="hero-spec-val hero-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          Open to new-grad SWE roles
+        </dd>
+      </div>
+    </dl>
+
+    <div class="hero-actions hero-enter" style="--i: 3">
       <a href={meta.resumePath} target="_blank" rel="noopener noreferrer" class="btn-primary">
         Resume
       </a>
@@ -18,13 +42,16 @@ import { meta, about } from "../content";
       </a>
     </div>
   </div>
-  <div class="hero-headshot-wrapper">
-    <img
-      src={meta.headshotPath}
-      alt={meta.name}
-      class="hero-headshot"
-      width="220"
-      height="220"
-    />
+
+  <div class="hero-headshot-wrapper hero-enter" style="--i: 2">
+    <div class="hero-headshot-frame">
+      <img
+        src={meta.headshotPath}
+        alt={meta.name}
+        class="hero-headshot"
+        width="240"
+        height="300"
+      />
+    </div>
   </div>
 </section>

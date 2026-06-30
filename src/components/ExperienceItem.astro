@@ -9,7 +9,9 @@ interface Props {
 const { entry } = Astro.props;
 ---
 
-<div class="experience-item">
+<div class="experience-item reveal">
+  <span class="exp-node" aria-hidden="true"></span>
+  <p class="exp-date mono-label">{entry.date}</p>
   <div class="exp-header">
     <h3 class="exp-role">{entry.role}</h3>
     <div class="exp-meta">
@@ -20,7 +22,6 @@ const { entry } = Astro.props;
       ) : (
         <span class="exp-company">{entry.company}</span>
       )}
-      <span class="exp-date">· {entry.date}</span>
     </div>
   </div>
   <p class="exp-summary">{entry.summary}</p>
