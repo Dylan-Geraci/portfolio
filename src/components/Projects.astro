@@ -9,12 +9,12 @@ const allTags = [...new Set(projects.flatMap((p) => p.tags))];
 
 <section class="site-container section" id="projects" aria-labelledby="projects-heading">
   <div class="section-label-col">
-    <SectionLabel number="03" label="Projects" />
+    <SectionLabel label="Projects" />
   </div>
   <div class="section-content">
     <h2 id="projects-heading" class="sr-only">Projects</h2>
 
-    <div class="filter-row" id="project-filters">
+    <div class="filter-row reveal" id="project-filters">
       <button class="filter-chip active" data-filter="all">All</button>
       {allTags.map((tag) => (
         <button class="filter-chip" data-filter={tag}>
@@ -23,7 +23,7 @@ const allTags = [...new Set(projects.flatMap((p) => p.tags))];
       ))}
     </div>
 
-    <div class="projects-list" id="projects-list">
+    <div class="projects-list reveal" id="projects-list">
       {projects.map((project) => (
         <ProjectCard project={project} />
       ))}

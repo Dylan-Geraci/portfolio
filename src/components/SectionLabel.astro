@@ -1,12 +1,16 @@
 ---
 interface Props {
-  number: string;
   label: string;
+  path?: string;
 }
 
-const { number, label } = Astro.props;
+const { label, path } = Astro.props;
+const slug = path ?? label.toLowerCase().replace(/\s+/g, "-");
 ---
 
 <div class="section-label">
-  <span class="bracket">[</span> {number} — {label} <span class="bracket">]</span>
+  <span class="section-label-path">
+    <span class="section-label-tilde">~/</span>{slug}
+  </span>
+  <span class="section-label-rule" aria-hidden="true"></span>
 </div>

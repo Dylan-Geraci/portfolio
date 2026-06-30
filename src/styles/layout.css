@@ -10,9 +10,9 @@
 
 .section {
   display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 3rem;
-  padding: 4rem 0;
+  grid-template-columns: 180px 1fr;
+  gap: 3.5rem;
+  padding: 5rem 1.5rem;
   border-top: 1px solid var(--color-border);
   scroll-margin-top: var(--nav-height);
 }
@@ -44,16 +44,16 @@
    ======================================== */
 
 .hero {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 3rem;
-  padding: 6rem 0 4rem;
+  gap: 4rem;
+  padding: 5.5rem 1.5rem 4.5rem;
   scroll-margin-top: var(--nav-height);
 }
 
 .hero-text {
-  flex: 1;
+  min-width: 0;
 }
 
 .hero-headshot-wrapper {
@@ -77,12 +77,33 @@
 .experience-list {
   display: flex;
   flex-direction: column;
+  position: relative;
+  padding-left: 1.75rem;
+}
+
+/* The terracotta timeline spine */
+.experience-list::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-accent),
+    var(--color-border) 85%
+  );
+}
+
+.experience-item {
+  position: relative;
 }
 
 .experience-item + .experience-item {
+  padding-top: 2.5rem;
+  margin-top: 2.5rem;
   border-top: 1px solid var(--color-border);
-  padding-top: 2rem;
-  margin-top: 2rem;
 }
 
 /* ========================================
@@ -90,9 +111,10 @@
    ======================================== */
 
 .projects-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem;
+  align-items: start;
 }
 
 .filter-row {
@@ -116,6 +138,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 /* ========================================
@@ -124,7 +147,7 @@
 
 .site-footer {
   border-top: 1px solid var(--color-border);
-  padding: 2rem 0;
+  padding: 2rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -135,12 +158,23 @@
    ======================================== */
 
 @media (max-width: 1024px) {
+  .section {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
   .section-label-col {
     position: static;
   }
 
   .skills-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .projects-list {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -152,18 +186,13 @@
   .section {
     grid-template-columns: 1fr;
     gap: 1.5rem;
-    padding: 3rem 0;
+    padding: 3rem 1.5rem;
   }
 
   .hero {
-    flex-direction: column-reverse;
-    text-align: center;
-    padding: 4rem 0 3rem;
-    gap: 2rem;
-  }
-
-  .hero-actions {
-    justify-content: center;
+    grid-template-columns: 1fr;
+    padding: 3rem 1.5rem 2.5rem;
+    gap: 2.25rem;
   }
 
   .skills-grid {
