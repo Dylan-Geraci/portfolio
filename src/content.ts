@@ -24,11 +24,19 @@ export interface ExperienceEntry {
   company: string;
   companyUrl?: string;
   date: string;
-  summary: string;
+  summary?: string;
   tags: string[];
 }
 
 export const experience: ExperienceEntry[] = [
+  {
+    role: "Associate AI Software Engineer",
+    company: "Internet Brands",
+    companyUrl: "https://www.internetbrands.com/",
+    date: "Aug 2026 — Present",
+    summary: "Building agentic AI workflows and full-stack features across Internet Brands' product platform, from API design to CI/CD-driven deployment.",
+    tags: ["Agile Methodologies", "Agentic Workflows", "CI/CD", "Docker", "PostgreSQL"],
+  },
   {
     role: "Software Engineer",
     company: "Mindful Metrics",
@@ -159,7 +167,7 @@ export const skills = {
   languages: ["Python", "JavaScript", "TypeScript", "C++", "Java", "Rust", "SQL", "HTML", "CSS"],
   frameworks: ["FastAPI", "React.js", "Next.js", "Node.js", "Express.js", "Tailwind CSS"],
   databases: ["PostgreSQL", "MongoDB", "MySQL", "SQLite"],
-  tools: ["Git", "Docker", "Kubernetes", "GitHub Actions", "PyTorch", "TensorFlow", "Jira", "Pytest"],
+  tools: ["Git", "Docker", "Kubernetes", "GitHub Actions", "CI/CD", "PyTorch", "TensorFlow", "Jira", "Pytest", "Agile Methodologies", "Agentic Workflows", "LLM Tooling"],
   cloud: ["AWS", "Google Cloud", "Azure", "Cloudflare"],
 };
 

@@ -24,7 +24,7 @@ const { entry } = Astro.props;
       )}
     </div>
   </div>
-  <p class="exp-summary">{entry.summary}</p>
+  {entry.summary && <p class="exp-summary">{entry.summary}</p>}
   <div class="chip-row">
     {entry.tags.map((tag) => (
       <TechChip label={tag} />
