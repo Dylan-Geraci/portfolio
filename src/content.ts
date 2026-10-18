@@ -10,7 +10,7 @@ export const meta = {
 
 export const about = {
   headline: "Software Engineer & AI/ML Enthusiast",
-  bio: "Hi, I'm Dylan, a Software Engineer based in Southern California, recently graduated from Cal State Fullerton with a B.S. in Computer Science. I build full-stack systems and ML pipelines end-to-end, from APIs and databases to deployed models. Outside of work I stay active at the gym, play chess, and dive into as much new music as possible. Open to new grad SWE opportunities — feel free to reach out.",
+  bio: "Hi, I'm Dylan, an Associate AI Software Engineer at Internet Brands based in Southern California, and a recent Cal State Fullerton graduate with a B.S. in Computer Science. I build full-stack systems and ML pipelines end-to-end, from APIs and databases to deployed models. Outside of work I stay active at the gym, play chess, and dive into as much new music as possible.",
   education: {
     school: "California State University, Fullerton",
     degree: "B.S. Computer Science",
@@ -86,7 +86,7 @@ export const experience: ExperienceEntry[] = [
     tags: ["Technical Communication", "Project Planning", "AI/ML"],
   },
   {
-    role: "Instructor",
+    role: "AI Instructor",
     company: "MIT's Day of AI — NextEdu Lab",
     companyUrl: "https://dayofai.org",
     date: "Jun 2025 — Sep 2025",
