@@ -1,0 +1,1979 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hero Build · prototype</title>
+
+  <!-- Same fonts as src/layouts/Base.astro -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- The site's real stylesheets, so tokens and hero styles stay in sync -->
+  <link rel="stylesheet" href="../src/styles/global.css" />
+  <link rel="stylesheet" href="../src/styles/layout.css" />
+  <link rel="stylesheet" href="../src/styles/components.css" />
+
+  <!-- Theme script from Base.astro, plus the build gate.
+       The gate runs before first paint so the links are locked from the start.
+       The build CSS defaults to the finished look, which is the intro's first beat.
+       Port target: Base.astro's inline script. -->
+  <script>
+    (function () {
+      var root = document.documentElement;
+      try {
+        var stored = localStorage.getItem("theme");
+        if (stored) root.setAttribute("data-theme", stored);
+        else if (window.matchMedia("(prefers-color-scheme: dark)").matches) root.setAttribute("data-theme", "dark");
+      } catch (e) {}
+
+      var seen = false;
+      try { seen = sessionStorage.getItem("hero-build-seen") === "1"; } catch (e) {}
+      var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!seen && !reduced) {
+        root.classList.add("hero-building");
+        // Safety net: if the build script never starts, don't leave the links locked.
+        setTimeout(function () {
+          if (!window.__heroBuildStarted) root.classList.remove("hero-building");
+        }, 2500);
+      }
+    })();
+  </script>
+
+  <style>
+    /* ========================================
+       Proposed new tokens (sprite palette).
+       Port: add these to global.css next to the others.
+       ======================================== */
+    :root {
+      --color-sand: #E4CDAA;
+      --color-paper: #FFFFFF;
+    }
+    [data-theme="dark"] {
+      --color-sand: #C9AE8C;
+      --color-paper: #F4ECE0;
+    }
+
+    /* ========================================
+       Stage: full-bleed wrapper so the dot grid spans the viewport
+       ======================================== */
+    .hero-stage {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid,
+    .hero-crew {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent);
+      mask-image: linear-gradient(to bottom, #000 80%, transparent);
+    }
+
+    .hero-grid.is-live {
+      opacity: 1;
+    }
+
+    .hero-crew {
+      z-index: 2;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ========================================
+       Skip button (top right of the intro)
+       ======================================== */
+    .hero-skip {
+      display: none;
+      position: absolute;
+      top: 1.25rem;
+      right: 1.5rem;
+      z-index: 3;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.8rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--color-text-secondary);
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .hero-skip:hover {
+      color: var(--color-accent);
+      border-color: var(--color-accent);
+    }
+
+    .hero-building .hero-skip {
+      display: inline-flex;
+    }
+
+    /* ========================================
+       Build state. Only paint changes, never layout,
+       so the finished intro sits exactly where the sketch was.
+       Every variable defaults to the finished look: the intro first paints
+       finished, the wave washes it to the sketch, the crew builds it back.
+       ======================================== */
+
+    /* Name: outlined letters under a solid ink layer. --ink-clip shapes the ink
+       (the wave drains it, builder 3 fills it); --sketch shows the outline. */
+    .hero-building .hero-name {
+      position: relative;
+      color: transparent;
+      -webkit-text-stroke: 1px color-mix(in srgb, var(--color-text-secondary) calc(var(--sketch, 0) * 100%), transparent);
+    }
+
+    .hero-building .hero-name::after {
+      content: attr(data-text);
+      content: attr(data-text) / "";
+      position: absolute;
+      inset: 0;
+      color: var(--color-text);
+      -webkit-text-stroke: 0;
+      clip-path: var(--ink-clip, none);
+    }
+
+    /* Spec rows: knocked down to faint ruled lines, rewritten by builder 1 */
+    .hero-building .hero-spec-row {
+      position: relative;
+    }
+
+    .hero-building .hero-spec-row::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -0.2rem;
+      border-bottom: 1px dashed var(--color-border);
+      opacity: calc(1 - var(--row, 1));
+    }
+
+    .hero-building .hero-spec-key,
+    .hero-building .hero-spec-val {
+      transform-origin: 0 100%;
+    }
+
+    /* Arrows: knocked down by the wave (--arrow-drop > 0), dropped back in from above by builder 2 */
+    .hero-building .hero-spec-key::before {
+      position: relative;
+      top: calc((1 - var(--arrow, 1)) * var(--arrow-drop, -0.9em));
+      opacity: var(--arrow, 1);
+    }
+
+    /* Buttons: paint runs off to dashed boxes, builder 4 repaints, locked until the build ends */
+    .hero-building .hero-actions a {
+      pointer-events: none;
+      cursor: default;
+      outline: 1px dashed color-mix(in srgb, var(--color-text-secondary) calc((1 - var(--paint, 1)) * 100%), transparent);
+      outline-offset: 3px;
+    }
+
+    .hero-building .btn-primary {
+      background: linear-gradient(var(--color-accent), var(--color-accent)) var(--paint-pos, left) bottom / calc(var(--paint-x, 1) * 100%) calc(var(--paint-y, 1) * 100%) no-repeat;
+      transition: color 0.15s ease;
+    }
+
+    .hero-building .btn-primary[data-bare] {
+      color: var(--color-text-secondary);
+    }
+
+    .hero-building .hero-link {
+      border-bottom-color: transparent;
+      background: linear-gradient(var(--color-border), var(--color-border)) var(--paint-pos, left) bottom / calc(var(--paint-x, 1) * 100%) 1px no-repeat;
+      background-origin: border-box;
+      opacity: calc(0.55 + var(--paint, 1) * 0.45);
+    }
+
+    /* Unlock cue, once the crew has left */
+    .hero-actions a.is-unlocked {
+      animation: hero-unlock 0.7s ease-out;
+    }
+
+    @keyframes hero-unlock {
+      from { box-shadow: 0 0 0 0 var(--color-accent); }
+      to { box-shadow: 0 0 0 10px transparent; }
+    }
+
+    /* ========================================
+       Headshot as a real print on a magazine page.
+       Replaces the terracotta offset frame.
+       ======================================== */
+    .hero-headshot-frame {
+      width: fit-content;
+      padding: 8px;
+      background: var(--color-paper);
+      border-radius: 3px;
+      box-shadow: var(--shadow-sm), var(--shadow-hover);
+    }
+
+    .hero-headshot-frame::before {
+      display: none;
+    }
+
+    .hero-headshot {
+      border-radius: 1px;
+    }
+
+    .hero-headshot-frame[data-photo*="tilt"] {
+      transform: rotate(2.5deg);
+    }
+
+    .hero-headshot-frame[data-photo*="tape"]::after {
+      content: "";
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      z-index: 2;
+      width: 92px;
+      height: 26px;
+      transform: translateX(-50%) rotate(-4deg);
+      background: color-mix(in srgb, var(--color-sand) 70%, transparent);
+      box-shadow: var(--shadow-sm);
+      clip-path: polygon(0 0, 100% 0, 97% 25%, 100% 50%, 97% 75%, 100% 100%, 0 100%, 3% 75%, 0 50%, 3% 25%);
+    }
+
+    /* ========================================
+       Prototype-only: page below the intro, dev panel
+       ======================================== */
+    .proto-below {
+      border-top: 1px solid var(--color-border);
+      padding: 3rem 1.5rem 40vh;
+      color: var(--color-text-secondary);
+    }
+
+    .dev {
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      z-index: 200;
+      width: 272px;
+      max-width: calc(100vw - 24px);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+    }
+
+    .dev-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+    }
+
+    .dev-head b {
+      font-weight: 600;
+    }
+
+    .dev-head span {
+      color: var(--color-text-secondary);
+    }
+
+    .dev-body {
+      display: grid;
+      gap: 0.55rem;
+      padding: 0.25rem 0.75rem 0.75rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .dev.is-collapsed .dev-body {
+      display: none;
+    }
+
+    .dev-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      padding-top: 0.4rem;
+    }
+
+    .dev button {
+      padding: 0.25rem 0.55rem;
+      font-family: inherit;
+      font-size: inherit;
+      color: var(--color-text);
+      background: var(--color-bg-alt);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+    }
+
+    .dev button:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    .dev .dev-collapse {
+      padding: 0 0.4rem;
+      background: none;
+      border: 0;
+      font-size: 0.9rem;
+      line-height: 1;
+    }
+
+    .dev label {
+      display: grid;
+      grid-template-columns: 4.6rem 1fr 3.2rem;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--color-text-secondary);
+    }
+
+    .dev label.dev-check {
+      grid-template-columns: auto 1fr;
+    }
+
+    .dev input[type="range"] {
+      width: 100%;
+      accent-color: var(--color-accent);
+    }
+
+    .dev input[type="checkbox"] {
+      accent-color: var(--color-accent);
+    }
+
+    .dev select {
+      grid-column: 2 / 4;
+      font-family: inherit;
+      font-size: inherit;
+      color: var(--color-text);
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 0.15rem 0.3rem;
+    }
+
+    .dev output {
+      text-align: right;
+      color: var(--color-text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .dev-note {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 0.68rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <!-- Nav, mirrored from Nav.astro (static here) -->
+  <header class="nav" role="banner">
+    <nav class="nav-inner" aria-label="Main navigation">
+      <a href="#" class="nav-logo">Dylan Geraci</a>
+      <div class="nav-links">
+        <a href="#about" class="nav-link">About</a>
+        <a href="#experience" class="nav-link">Experience</a>
+        <a href="#projects" class="nav-link">Projects</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </div>
+      <div class="nav-right">
+        <button class="hamburger" type="button" aria-label="Open menu"><span></span><span></span><span></span></button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content" style="padding-top: var(--nav-height);">
+    <div class="hero-stage" id="hero-stage">
+      <canvas class="hero-grid" id="hero-grid" aria-hidden="true"></canvas>
+
+      <!-- Mirrors src/components/Hero.astro, minus the .hero-enter fade (the build replaces it) -->
+      <section class="site-container hero" aria-label="Introduction">
+        <button class="hero-skip" id="hero-skip" type="button" aria-label="Skip the intro animation">skip build →</button>
+
+        <div class="hero-text">
+          <p class="hero-eyebrow mono-label">Software Engineer</p>
+          <h1 class="hero-name" data-text="Dylan Geraci">Dylan Geraci</h1>
+
+          <dl class="hero-specs">
+            <div class="hero-spec-row">
+              <dt class="hero-spec-key">based</dt>
+              <dd class="hero-spec-val">Southern California</dd>
+            </div>
+            <div class="hero-spec-row">
+              <dt class="hero-spec-key">focus</dt>
+              <dd class="hero-spec-val">Full-stack systems</dd>
+            </div>
+            <div class="hero-spec-row">
+              <dt class="hero-spec-key">role</dt>
+              <dd class="hero-spec-val">AI SWE @ Internet Brands</dd>
+            </div>
+          </dl>
+
+          <div class="hero-actions">
+            <a href="../public/images/Resume_DylanGeraci_june.pdf" target="_blank" rel="noopener noreferrer" class="btn-primary">Resume</a>
+            <a href="https://www.linkedin.com/in/dylangeraci/" target="_blank" rel="noopener noreferrer" class="hero-link">LinkedIn</a>
+            <a href="https://github.com/Dylan-Geraci" target="_blank" rel="noopener noreferrer" class="hero-link">GitHub</a>
+          </div>
+        </div>
+
+        <div class="hero-headshot-wrapper">
+          <div class="hero-headshot-frame" id="photo-frame" data-photo="tilt tape">
+            <img src="../public/images/grad-pic-zoomed.jpeg" alt="Dylan Geraci" class="hero-headshot" width="240" height="300" />
+          </div>
+        </div>
+      </section>
+
+      <canvas class="hero-crew" id="hero-crew" aria-hidden="true"></canvas>
+    </div>
+
+    <div class="site-container proto-below">
+      <p class="mono-label">~/about</p>
+      <p>About, Experience, Projects and Contact continue here, unchanged.</p>
+    </div>
+  </main>
+
+  <!-- Prototype-only dev panel -->
+  <aside class="dev" id="dev" aria-label="Prototype controls">
+    <div class="dev-head">
+      <span><b>hero-build</b> · prototype</span>
+      <button class="dev-collapse" id="dev-collapse" type="button" aria-expanded="true" aria-label="Collapse controls">–</button>
+    </div>
+    <div class="dev-body">
+      <div class="dev-row">
+        <button type="button" id="dev-replay">replay</button>
+        <button type="button" id="dev-play">pause</button>
+        <button type="button" id="dev-skip">skip</button>
+      </div>
+      <label>time <input type="range" id="dev-scrub" min="0" max="6" step="0.01" value="0" /><output id="dev-scrub-out">0.00s</output></label>
+      <label>speed <input type="range" id="dev-speed" min="0.5" max="2" step="0.05" value="1" /><output id="dev-speed-out">1.00×</output></label>
+      <label>crew
+        <select id="dev-crew">
+          <option value="final">Surf City + lifter</option>
+          <option value="beach">A · Surf City</option>
+          <option value="gym">B · Gym</option>
+          <option value="basic">C · Site crew</option>
+        </select>
+      </label>
+      <label>sprite px
+        <select id="dev-px">
+          <option value="1">1 (tiny)</option>
+          <option value="2" selected>2 (default)</option>
+          <option value="3">3 (chunky)</option>
+        </select>
+      </label>
+      <label>photo
+        <select id="dev-photo">
+          <option value="tilt tape">tilt + tape</option>
+          <option value="tilt">tilt</option>
+          <option value="tape">tape</option>
+          <option value="flat">flat</option>
+        </select>
+      </label>
+      <label class="dev-check"><input type="checkbox" id="dev-grid" checked /> background on</label>
+      <label>surface
+        <select id="dev-surface">
+          <option value="crest" selected>perspective crests</option>
+          <option value="swell">even swell lines (old)</option>
+          <option value="ripple">ripple dots</option>
+          <option value="crumple">crumple dots (old)</option>
+        </select>
+      </label>
+      <label>wave <input type="range" id="dev-wave" min="0" max="30" step="1" value="14" /><output id="dev-wave-out">14</output></label>
+      <label class="dev-check"><input type="checkbox" id="dev-ride" checked /> surfer rides in on the wave (B)</label>
+      <label>strength <input type="range" id="dev-strength" min="0" max="60" step="1" value="20" /><output id="dev-strength-out">20</output></label>
+      <label>swell <input type="range" id="dev-swell" min="0" max="6" step="0.5" value="4" /><output id="dev-swell-out">4</output></label>
+      <label>calm <input type="range" id="dev-calm" min="0.95" max="0.995" step="0.005" value="0.985" /><output id="dev-calm-out">0.985</output></label>
+      <label>radius <input type="range" id="dev-radius" min="60" max="240" step="5" value="125" /><output id="dev-radius-out">125</output></label>
+      <label class="dev-check"><input type="checkbox" id="dev-rm" /> simulate reduced motion</label>
+      <div class="dev-row">
+        <button type="button" id="dev-theme">toggle theme</button>
+        <button type="button" id="dev-seen">clear session flag</button>
+      </div>
+      <p class="dev-note">Esc skips · R replays · Space pauses<br /><span id="dev-status"></span></p>
+    </div>
+  </aside>
+
+  <script>
+  (function () {
+    "use strict";
+    window.__heroBuildStarted = true;
+
+    /* ========================================
+       Sprites
+       Pixel maps: '.' empty, k ink, a accent, s sand, w paper.
+       Each sprite is a list of 1–2 frames. A 1px ink outline is added at draw time.
+       ======================================== */
+    const SURFER = [[
+      "......kkk.....", ".....kkkkk....", ".....ksss.....", "......sks.....",
+      "....aaaaaa....", "...s.aaaa.s...", "......aaa.....", ".....kkkkk....",
+      ".....s...s....", "....s.....s...", ".kkkkkkkkkkkk.", "kwwwwwwwwwwwwk", ".kkkkkkkkkkkk.",
+    ], [
+      "......kkk.....", ".....kkkkk....", ".....ksss.....", "......sks.....",
+      "..s.aaaaaa.s..", ".....aaaa.....", "......aaa.....", ".....kkkkk....",
+      ".....s...s....", "....s.....s...", ".kkkkkkkkkkkk.", "kwwwwwwwwwwwwk", ".kkkkkkkkkkkk.",
+    ]];
+    const GULL = [[
+      "kk.......kk.", ".kkk...kkk..", "...kwwwwk.ww", "....wwwwwwkw", ".....wwwwwaa", "......a..a..",
+    ], [
+      "............", "............", "kkkkwwwwkkww", "....wwwwwwkw", ".....wwwwwaa", "......a..a..",
+    ]];
+    const LIFTER = [[
+      "aa............aa", "aakkkkkkkkkkkkaa", "aa..s......s..aa", "....s.kkkk.s....",
+      "....s.ssss.s....", "....s.kssk.s....", "....ssaaaass....", "......aaaa......",
+      "......kkkk......", "......s..s......", ".....kk..kk.....",
+    ], [
+      "aa............aa", "aakkkkkkkkkkkkaa", "aa..s......s..aa", "....s.kkkk.s....",
+      "....s.ssss.s....", "....s.kssk.s....", "....ssaaaass....", "......aaaa......",
+      "......kkkk......", ".....s....s.....", "....kk....kk....",
+    ]];
+    const LIFEGUARD = [[
+      "...kkkk....", "..kkkkkk...", "..ssssss...", "..skssks...", "..ssssss...", "...ssss....",
+      "..aaaaaa...", ".s.aaaa.s..", ".s.aaaa.aaa", "...s..s.aaa", "...s..s....", "..kk..kk...",
+    ], [
+      "...kkkk....", "..kkkkkk...", "..ssssss...", "..skssks...", "..ssssss...", "...ssss....",
+      "..aaaaaa...", ".s.aaaa.s..", ".s.aaaa.aaa", "...s.s..aaa", "..s...s....", ".kk...kk...",
+    ]];
+    const VOLLEYBALL = [[
+      "...kkkk...", "..kwwaak..", ".kwwaawwk.", ".kaawwwwk.", ".kwwwwaak.", "..kaawwk..", "...kkkk...",
+    ], [
+      "...kkkk...", "..kaawwk..", ".kwwwwaak.", ".kwwaawwk.", ".kaawwwwk.", "..kwwaak..", "...kkkk...",
+    ]];
+    const PLATE = [[
+      "...kkkk...", ".kkaaaakk.", ".kaaawaak.", "kaaaaaaaak", "kaaakkaaak",
+      "kaaakkaaak", "kaaaaaaaak", ".kaaaaaak.", ".kkaaaakk.", "...kkkk...",
+    ], [
+      "...kkkk...", ".kkaaaakk.", ".kaaaaaak.", "kaaaaaaaak", "kaaakkaaak",
+      "kaaakkaaak", "kaaaaaaaak", ".kaawaaak.", ".kkaaaakk.", "...kkkk...",
+    ]];
+    const KETTLEBELL = [[
+      "...kkkk...", "..k....k..", "..k....k..", ".kkkkkkkk.", "kkkkkkkkkk",
+      "kkwkkkkwkk", "kkkkkkkkkk", "kaaaaaaaak", ".kkkkkkkk.", "..k....k..",
+    ], [
+      "...kkkk...", "..k....k..", "..k....k..", ".kkkkkkkk.", "kkkkkkkkkk",
+      "kkwkkkkwkk", "kkkkkkkkkk", "kaaaaaaaak", ".kkkkkkkk.", ".k......k.",
+    ]];
+    const CHALKER = [[
+      "...kkkk....", "..aaaaaa...", "..ssssss...", "..skssks...", "..ssssss...", "...ssss....",
+      ".sskkkkss..", ".s.kkkk.s..", ".w.kkkk.w..", "...aaaa....", "...s..s....", "..kk..kk...",
+    ], [
+      "...kkkk....", "..aaaaaa...", "..ssssss...", "..skssks...", "..ssssss...", "...ssss....",
+      ".sskkkkss..", ".s.kkkk.s..", ".w.kkkk.w..", "...aaaa....", "...s.s.....", "..kk..kk...",
+    ]];
+    const FOREMAN = [[
+      "...aaaa.....", "..aaaaaaa...", "..ssssss....", "..skssks....", "..ssssss....", "...kkkk.....",
+      "..kkkkkk....", ".s.kkkk.swww", "...kkkk.....", "...k..k.....", "..kk..kk....",
+    ], [
+      "...aaaa.....", "..aaaaaaa...", "..ssssss....", "..skssks....", "..ssssss....", "...kkkk.....",
+      "..kkkkkk....", ".s.kkkk.swww", "...kkkk.....", "..k....k....", ".kk....kk...",
+    ]];
+    const RUNNER = [[
+      "...kkkk.....", "..kkkkkkk...", "..ssssss....", "..skssks.a..", "..ssssss.aa.", "...kkkkaaaaa",
+      "..kkkkkk.aa.", ".s.kkkk..a..", "...kkkk.....", "...k..k.....", "..kk..kk....",
+    ], [
+      "...kkkk.....", "..kkkkkkk...", "..ssssss....", "..skssks.a..", "..ssssss.aa.", "...kkkkaaaaa",
+      "..kkkkkk.aa.", ".s.kkkk..a..", "...kkkk.....", "..k....k....", ".kk....kk...",
+    ]];
+    const INKER = [[
+      "....kk......", "...kkkk.....", "..kkkkkk..a.", "..ssssss..s.", "..skssks..s.", "..ssssss..s.",
+      "...aaaa...s.", "..aaaaaasss.", "...aaaa...s.", "...kkkk...k.", "...k..k.....", "..kk..kk....",
+    ], [
+      "....kk......", "...kkkk.....", "..kkkkkk..a.", "..ssssss..s.", "..skssks..s.", "..ssssss..s.",
+      "...aaaa...s.", "..aaaaaasss.", "...aaaa...s.", "...kkkk...k.", "..k....k....", ".kk....kk...",
+    ]];
+    const PAINTER = [[
+      "...wwww.....", "..wwwwwww...", "..ssssss....", "..skssks....", "..ssssss.aaa", "...aaaa..aaa",
+      "..aaaaaa..k.", ".s.aaaa.skk.", "...aaaa.....", "...k..k.....", "..kk..kk....",
+    ], [
+      "...wwww.....", "..wwwwwww...", "..ssssss....", "..skssks....", "..ssssss.aaa", "...aaaa..aaa",
+      "..aaaaaa..k.", ".s.aaaa.skk.", "...aaaa.....", "..k....k....", ".kk....kk...",
+    ]];
+
+    /* ========================================
+       Crew config. One array per crew; the site will ship just one.
+       job:    rows | arrows | name | buttons  (one builder per job)
+       motion: walk | surf | roll | fly | hop | bounce
+       trail:  optional particles: spray | drips | chalk
+       ======================================== */
+    const CREWS = {
+      final: [
+        { name: "Surfer", job: "rows", motion: "surf", trail: "spray", frames: SURFER },
+        { name: "Gull", job: "arrows", motion: "fly", frames: GULL },
+        { name: "Lifter", job: "name", motion: "walk", frames: LIFTER },
+        { name: "Lifeguard", job: "buttons", motion: "walk", trail: "drips", frames: LIFEGUARD },
+      ],
+      beach: [
+        { name: "Surfer", job: "rows", motion: "surf", trail: "spray", frames: SURFER },
+        { name: "Gull", job: "arrows", motion: "fly", frames: GULL },
+        { name: "Volleyball", job: "name", motion: "bounce", frames: VOLLEYBALL },
+        { name: "Lifeguard", job: "buttons", motion: "walk", trail: "drips", frames: LIFEGUARD },
+      ],
+      gym: [
+        { name: "Plate", job: "rows", motion: "roll", frames: PLATE },
+        { name: "Kettlebell", job: "arrows", motion: "hop", frames: KETTLEBELL },
+        { name: "Lifter", job: "name", motion: "walk", frames: LIFTER },
+        { name: "Chalker", job: "buttons", motion: "walk", trail: "chalk", frames: CHALKER },
+      ],
+      basic: [
+        { name: "Foreman", job: "rows", motion: "walk", frames: FOREMAN },
+        { name: "Runner", job: "arrows", motion: "hop", frames: RUNNER },
+        { name: "Inker", job: "name", motion: "walk", frames: INKER },
+        { name: "Painter", job: "buttons", motion: "walk", trail: "drips", frames: PAINTER },
+      ],
+    };
+
+    /* ========================================
+       Timeline (seconds at 1×).
+       0 → wave[0]: the finished intro holds for a beat.
+       wave: one crest sweeps left to right and washes the intro back to the sketch.
+       Each job window includes the walk-on; the builder leaves during the
+       `exit` seconds after its window.
+       ======================================== */
+    const TIMELINE = {
+      wave: [0.5, 1.8],
+      rows: [1.8, 5.0],
+      arrows: [5.0, 7.4],
+      name: [5.0, 7.4],
+      buttons: [7.2, 9.8],
+      enter: 0.5,
+      exit: 0.6,
+      unlock: 10.4,
+      water: 10.4,   // the water starts answering the cursor
+    };
+    const END = Math.max(TIMELINE.unlock, TIMELINE.water);
+
+    /* The opening wave: a tall crest driven through the water field,
+       so the ripples it leaves behind are its own leftover energy. */
+    const WAVE = {
+      height: 14,  // crest height in the water field
+      width: 46,   // crest half-width (px)
+      lean: 28,    // the top of the front runs this far ahead of the bottom (px)
+      lag: 36,     // ink lingers this far behind the crest at the foot of the letters (px)
+      ride: true,  // option B touch: the surfer rides in on the wave's tail
+    };
+
+    const GRID = {
+      mode: "crest",   // crest | swell | ripple | crumple
+      gap: 22,         // dot spacing (ripple, crumple)
+      dot: 1.2,
+      lineGap: 18,     // even swell line spacing
+      rowGap: 24,      // crest: average spacing between swell rows
+      depth: 1.7,      // crest: how hard the rows squeeze toward the horizon
+      wavelength: 170, // crest: wavelength along the nearest row (px)
+      crest: 0.32,     // crest: how high the water must be to get a stroke (-1..1)
+      approach: 0.22,  // crest: rows per second drifting toward the viewer
+      cell: 10,        // water resolution in px
+      calm: 0.985,     // water damping per step (lower settles faster)
+      lift: 1.6,       // how far ripples bend the lines
+      swell: 4,        // ambient swell amplitude in px (0 = still water)
+      radius: 125,     // crumple radius; water wake width is radius / 40 cells
+      strength: 20,
+      stiffness: 170,  // crumple springs
+      damping: 13,
+      swirl: 0.6,
+    };
+
+    /* ========================================
+       Elements and state
+       ======================================== */
+    const root = document.documentElement;
+    const stage = document.getElementById("hero-stage");
+    const crewCanvas = document.getElementById("hero-crew");
+    const gridCanvas = document.getElementById("hero-grid");
+    const skipBtn = document.getElementById("hero-skip");
+    const nameEl = stage.querySelector(".hero-name");
+    const rowEls = [...stage.querySelectorAll(".hero-spec-row")];
+    const linkEls = [...stage.querySelectorAll(".hero-actions a")];
+    const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    let crew = CREWS.final;
+    let spritePx = 2;
+    let t = END;
+    let speed = 1;
+    let playing = false;
+    let building = root.classList.contains("hero-building");
+    let gridEnabled = true;
+    let simReduced = false;
+    let geo = null;
+    let paths = null;
+    let C = {};
+
+    const TAU = Math.PI * 2;
+    const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+    const lerp = (a, b, u) => a + (b - a) * u;
+    const ease = (u) => 1 - Math.pow(1 - u, 3);
+    const smooth = (u) => u * u * (3 - 2 * u);
+    const hash = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+    const isReduced = () => reducedQuery.matches || simReduced;
+
+    function readColors() {
+      const css = getComputedStyle(root);
+      const v = (n) => css.getPropertyValue(n).trim();
+      C = {
+        k: v("--color-text"), a: v("--color-accent"), s: v("--color-sand"), w: v("--color-paper"),
+        bg: v("--color-bg"), dot: v("--color-border"), dotActive: v("--color-text-secondary"),
+      };
+    }
+
+    /* ========================================
+       Geometry, measured from the real DOM (stage coordinates)
+       ======================================== */
+    function measure() {
+      const s = stage.getBoundingClientRect();
+      const rel = (r) => ({ x0: r.left - s.left, x1: r.right - s.left, top: r.top - s.top, bottom: r.bottom - s.top });
+      const textRect = (el) => {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        return rel(range.getBoundingClientRect());
+      };
+
+      const rows = rowEls.map((row) => {
+        const key = row.querySelector(".hero-spec-key");
+        const val = row.querySelector(".hero-spec-val");
+        const r = rel(row.getBoundingClientRect());
+        const kr = rel(key.getBoundingClientRect());
+        return {
+          row, key, val, kr,
+          vr: rel(val.getBoundingClientRect()),
+          x0: r.x0,
+          x1: textRect(val).x1,
+          y: r.bottom + 2,
+          arrow: { x: kr.x0 + 5, top: kr.top },
+        };
+      });
+
+      // Name lines (the name can wrap on a phone) plus the first baseline
+      const nr = rel(nameEl.getBoundingClientRect());
+      const range = document.createRange();
+      range.selectNodeContents(nameEl);
+      const lines = [];
+      [...range.getClientRects()].forEach((cr) => {
+        const r = rel(cr);
+        const same = lines.find((l) => Math.abs(l.top - r.top) < 4);
+        if (same) { same.x0 = Math.min(same.x0, r.x0); same.x1 = Math.max(same.x1, r.x1); }
+        else lines.push(r);
+      });
+      lines.sort((a, b) => a.top - b.top);
+      const probe = document.createElement("span");
+      probe.style.cssText = "display:inline-block;width:0;height:0;";
+      nameEl.prepend(probe);
+      const base0 = probe.getBoundingClientRect().bottom - s.top;
+      probe.remove();
+      const fontSize = parseFloat(getComputedStyle(nameEl).fontSize);
+      lines.forEach((l) => { l.base = base0 + (l.top - lines[0].top); });
+
+      const buttons = linkEls.map((el) => ({ el, primary: el.classList.contains("btn-primary"), ...rel(el.getBoundingClientRect()) }));
+
+      geo = { W: s.width, H: s.height, rows, name: { box: nr, lines, fontSize }, buttons };
+      paths = buildPaths();
+    }
+
+    /* ========================================
+       Paths. Each job is a list of segments:
+       "work" segments reveal target i as the builder crosses them,
+       "move" segments carry the builder to the next target (with an arc).
+       ======================================== */
+    const rowReversed = (i) => i % 2 === 1;
+
+    function seg(kind, i, from, to, len, arc = 0) {
+      return { kind, i, from, to, len, arc };
+    }
+
+    function buildPaths() {
+      const P = { rows: [], arrows: [], name: [], buttons: [] };
+      const { rows, name, buttons } = geo;
+      const arrowMotion = crew.find((m) => m.job === "arrows")?.motion;
+
+      // Zig-zag: even rows ride left to right, odd rows right to left
+      const rowStart = (r, i) => ({ x: rowReversed(i) ? r.x1 : r.x0, y: r.y });
+      const rowEnd = (r, i) => ({ x: rowReversed(i) ? r.x0 : r.x1, y: r.y });
+      rows.forEach((r, i) => {
+        P.rows.push(seg("work", i, rowStart(r, i), rowEnd(r, i), r.x1 - r.x0));
+        const n = rows[i + 1];
+        if (n) P.rows.push(seg("move", i, rowEnd(r, i), rowStart(n, i + 1), 40, 10));
+      });
+
+      const perch = (r) => ({ x: r.arrow.x, y: arrowMotion === "fly" ? r.arrow.top - 2 : r.y });
+      rows.forEach((r, i) => {
+        P.arrows.push(seg("work", i, perch(r), perch(r), 60));
+        const n = rows[i + 1];
+        if (n) P.arrows.push(seg("move", i, perch(r), perch(n), 50, 24));
+      });
+
+      name.lines.forEach((l, i) => {
+        const y = l.base + 2;
+        P.name.push(seg("work", i, { x: l.x0, y }, { x: l.x1, y }, l.x1 - l.x0));
+        const n = name.lines[i + 1];
+        if (n) P.name.push(seg("move", i, { x: l.x1, y }, { x: n.x0, y: n.base + 2 }, 60, 18));
+      });
+
+      buttons.forEach((b, i) => {
+        P.buttons.push(seg("work", i, { x: b.x0, y: b.top + 1 }, { x: b.x1, y: b.top + 1 }, b.x1 - b.x0));
+        const n = buttons[i + 1];
+        if (n) P.buttons.push(seg("move", i, { x: b.x1, y: b.top + 1 }, { x: n.x0, y: n.top + 1 }, Math.max(12, n.x0 - b.x1), 6));
+      });
+      return P;
+    }
+
+    // Position on a path at progress p, plus how far along each work target is.
+    function evalPath(segs, p, motion) {
+      const total = segs.reduce((sum, s) => sum + s.len, 0);
+      let d = clamp(p) * total;
+      const fr = [];
+      let out = null;
+      for (const s of segs) {
+        const u = out ? 0 : clamp(d / s.len);
+        if (s.kind === "work") fr[s.i] = out ? 0 : u;
+        if (!out && (d <= s.len || s === segs[segs.length - 1])) {
+          const lift = s.arc * (motion === "fly" ? 1.6 : 1);
+          out = {
+            x: lerp(s.from.x, s.to.x, u) + (motion === "fly" && s.kind === "move" ? Math.sin(Math.PI * u) * 20 : 0),
+            y: lerp(s.from.y, s.to.y, u) - Math.sin(Math.PI * u) * lift,
+            seg: s, u,
+            dir: s.to.x < s.from.x ? -1 : 1,
+          };
+        }
+        d -= s.len;
+      }
+      return { ...out, fr };
+    }
+
+    function workProgress(job, time) {
+      const [a, b] = TIMELINE[job];
+      return clamp((time - a - TIMELINE.enter) / (b - a - TIMELINE.enter));
+    }
+
+    /* Where a builder is at time `time`, or null when off stage. */
+    function actorAt(m, time) {
+      const [a, b] = TIMELINE[m.job];
+      if (m.job === "rows" && WAVE.ride && time < a + TIMELINE.enter) return rideIn(m, time);
+      if (time < a || time > b + TIMELINE.exit) return null;
+      const segs = paths[m.job];
+      const fly = m.motion === "fly";
+      const jumpy = m.motion === "hop" || m.motion === "bounce";
+
+      if (time < a + TIMELINE.enter) {
+        const u = ease((time - a) / TIMELINE.enter);
+        const start = evalPath(segs, 0, m.motion);
+        const from = fly ? { x: start.x + 160, y: start.y - 120 } : { x: Math.max(-30, start.x - 240), y: start.y };
+        return {
+          x: lerp(from.x, start.x, u),
+          y: lerp(from.y, start.y, u) - (jumpy ? Math.abs(Math.sin(u * Math.PI * 2)) * 16 : 0),
+          dir: from.x > start.x ? -1 : 1,
+          alpha: from.x > -30 && !fly ? clamp(u * 3) : 1,
+        };
+      }
+
+      if (time > b) {
+        const u = (time - b) / TIMELINE.exit;
+        const end = evalPath(segs, 1, m.motion);
+        const to = fly ? { x: end.x + 200, y: end.y - 140 } : { x: Math.min(geo.W + 30, end.x + 300), y: end.y };
+        return {
+          x: lerp(end.x, to.x, u * u),
+          y: lerp(end.y, to.y, u * u) - (jumpy ? Math.abs(Math.sin(u * Math.PI * 3)) * 14 : 0),
+          dir: 1,
+          alpha: to.x < geo.W + 30 && !fly ? clamp((1 - u) * 3) : 1,
+        };
+      }
+
+      const pos = evalPath(segs, workProgress(m.job, time), m.motion);
+      let y = pos.y;
+      if (pos.seg.kind === "work") {
+        if (m.motion === "surf") y += Math.sin(time * 9) * 1.5;
+        if (fly) y += Math.sin(time * 14) * 2;
+        if (m.motion === "hop") y -= Math.abs(Math.sin(time * 12)) * 3;
+        if (m.motion === "bounce") y -= Math.abs(Math.sin(pos.u * Math.max(1, pos.seg.len / 28) * Math.PI)) * 16;
+      }
+      return { x: pos.x, y, dir: pos.dir, alpha: 1 };
+    }
+
+    // Option B touch: the row builder comes in on the wave's tail and coasts to row 1
+    function rideIn(m, time) {
+      const from = TIMELINE.wave[0] + 0.3, to = TIMELINE.rows[0] + TIMELINE.enter;
+      if (time < from) return null;
+      const u = clamp((time - from) / (to - from));
+      const start = evalPath(paths[m.job], 0, m.motion);
+      return {
+        x: lerp(-40, start.x, 1 - Math.pow(1 - u, 2.4)),
+        y: start.y - (1 - u) * 14 + Math.sin(time * 9) * 1.5,
+        dir: 1,
+        alpha: 1,
+      };
+    }
+
+    /* ========================================
+       The opening wave
+       ======================================== */
+    // Crest position at mid-height: enters off the left edge, leaves off the right
+    function crestX(time) {
+      const [a, b] = TIMELINE.wave;
+      const u = clamp((time - a) / (b - a));
+      return lerp(-0.15 * geo.W, 1.15 * geo.W, 0.6 * u + 0.4 * smooth(u));
+    }
+
+    // The front leans forward at the top and wobbles a little
+    function crestAt(y, time) {
+      return crestX(time) + WAVE.lean * (0.5 - y / geo.H) + Math.sin(y * 0.021 + time * 7) * 5;
+    }
+
+    // When the crest reached x at height y (ignoring the wobble); Infinity if it never does
+    function crestTimeAt(x, y) {
+      const off = WAVE.lean * (0.5 - y / geo.H);
+      let [lo, hi] = TIMELINE.wave;
+      if (crestX(lo) + off >= x) return lo;
+      if (crestX(hi) + off < x) return Infinity;
+      for (let k = 0; k < 18; k++) {
+        const mid = (lo + hi) / 2;
+        if (crestX(mid) + off < x) lo = mid; else hi = mid;
+      }
+      return hi;
+    }
+
+    // How far the crest has washed something whose wet edge starts at x0: 0 untouched, 1 gone
+    const washed = (x0, span, y, time) => clamp((crestAt(y, time) - x0) / span);
+
+    /* ========================================
+       Applying time t to the DOM
+       ======================================== */
+    function clipRight(el, rect, x) {
+      const hidden = clamp(rect.x1 - x, 0, rect.x1 - rect.x0);
+      el.style.clipPath = `inset(-8px ${hidden}px -8px -8px)`;
+    }
+
+    function clipLeft(el, rect, x) {
+      const hidden = clamp(x - rect.x0, 0, rect.x1 - rect.x0);
+      el.style.clipPath = `inset(-8px -8px -8px ${hidden}px)`;
+    }
+
+    // Tumble an element down and out as the wave hits it
+    function knock(el, w) {
+      el.style.clipPath = "";
+      if (w <= 0) { el.style.transform = ""; el.style.opacity = ""; return; }
+      el.style.transform = `translateY(${(w * w * 0.9).toFixed(3)}em) rotate(${(w * w * 7).toFixed(2)}deg)`;
+      el.style.opacity = (1 - w).toFixed(3);
+    }
+
+    // Name ink clip bands: line i spans band(i) to band(i + 1), in name-box coordinates
+    function nameBand(i) {
+      const { box, lines, fontSize } = geo.name;
+      return i === 0 ? -fontSize : lines[i - 1].base + fontSize * 0.3 - box.top;
+    }
+
+    function setBuilding(on, { pulse = false } = {}) {
+      if (on === building) return;
+      building = on;
+      root.classList.toggle("hero-building", on);
+      linkEls.forEach((el) => {
+        if (on) {
+          el.setAttribute("tabindex", "-1");
+          el.setAttribute("aria-disabled", "true");
+        } else {
+          el.removeAttribute("tabindex");
+          el.removeAttribute("aria-disabled");
+          el.removeAttribute("data-bare");
+          ["--paint", "--paint-x", "--paint-y", "--paint-pos"].forEach((p) => el.style.removeProperty(p));
+          if (pulse) {
+            el.classList.remove("is-unlocked");
+            void el.offsetWidth;
+            el.classList.add("is-unlocked");
+          }
+        }
+      });
+      if (!on) {
+        // Finished intro = plain site CSS: drop every inline build style
+        nameEl.style.removeProperty("--ink-clip");
+        nameEl.style.removeProperty("--sketch");
+        geo.rows.forEach((r) => {
+          r.row.style.removeProperty("--row");
+          r.key.style.removeProperty("--arrow");
+          r.key.style.removeProperty("--arrow-drop");
+          [r.key, r.val].forEach((el) => { el.style.clipPath = ""; el.style.transform = ""; el.style.opacity = ""; });
+        });
+        if (document.activeElement === skipBtn) linkEls[0].focus();
+      }
+    }
+
+    function apply(time) {
+      const wasBuilding = building;
+      setBuilding(time < TIMELINE.unlock, { pulse: wasBuilding && playing });
+
+      if (building) {
+        if (time < TIMELINE.wave[1]) applyWash(time);
+        else applyBuild(time);
+      }
+
+      drawCrew(time);
+      grid.setStage(time);
+    }
+
+    /* The wave washes everything it crosses back to the sketch. Before it arrives
+       every factor is 0, which is the finished intro. */
+    function applyWash(time) {
+      // Name: the ink drains out behind the crest, slowest at the foot of the letters
+      const { box, lines, fontSize } = geo.name;
+      const R = box.x1 - box.x0 + 30, B = box.bottom - box.top + fontSize;
+      const edge = (x) => clamp(x - box.x0, -20, R);
+      const pts = [`${R}px ${-fontSize}px`, `${R}px ${B}px`];
+      for (let i = lines.length - 1; i >= 0; i--) {
+        const l = lines[i];
+        pts.push(`${edge(crestAt(l.bottom, time) - WAVE.lag)}px ${i === lines.length - 1 ? B : nameBand(i + 1)}px`);
+        pts.push(`${edge(crestAt(l.top, time))}px ${nameBand(i)}px`);
+      }
+      nameEl.style.setProperty("--ink-clip", `polygon(${pts.join(", ")})`);
+      nameEl.style.setProperty("--sketch", time > TIMELINE.wave[0] ? "1" : "0");
+
+      // Spec rows: words and arrows are knocked down, leaving faint ruled lines
+      geo.rows.forEach((r) => {
+        const y = (r.kr.top + r.y) / 2;
+        r.row.style.setProperty("--row", (1 - washed(r.x0, r.x1 - r.x0 + 60, y, time)).toFixed(3));
+        knock(r.key, washed(r.kr.x0, 120, y, time));
+        knock(r.val, washed(r.vr.x0, 160, y, time));
+        r.key.style.setProperty("--arrow", (1 - washed(r.kr.x0 - 24, 90, y, time)).toFixed(3));
+        r.key.style.setProperty("--arrow-drop", "0.9em");
+      });
+
+      // Buttons: the primary's paint runs off the bottom; link underlines wash away
+      geo.buttons.forEach((b) => {
+        const w = washed(b.x0, b.x1 - b.x0 + 70, (b.top + b.bottom) / 2, time);
+        const s = b.el.style;
+        s.setProperty("--paint", (1 - w).toFixed(3));
+        s.setProperty("--paint-x", b.primary ? "1" : (1 - w).toFixed(3));
+        s.setProperty("--paint-y", b.primary ? (1 - w).toFixed(3) : "1");
+        s.setProperty("--paint-pos", b.primary ? "left" : "right");
+        b.el.toggleAttribute("data-bare", w > 0.5);
+      });
+    }
+
+    /* The crew builds the sketch back into the finished intro. */
+    function applyBuild(time) {
+      nameEl.style.setProperty("--sketch", "1");
+
+      // Builder 1: spec rows
+      const rowsFr = evalPath(paths.rows, workProgress("rows", time)).fr;
+      geo.rows.forEach((r, i) => {
+        const f = rowsFr[i];
+        r.row.style.setProperty("--row", f.toFixed(3));
+        [r.key, r.val].forEach((el) => { el.style.transform = ""; el.style.opacity = ""; });
+        if (f >= 1) {
+          r.key.style.clipPath = "none";
+          r.val.style.clipPath = "none";
+        } else if (rowReversed(i)) {
+          const x = lerp(r.x1, r.x0, f);
+          clipLeft(r.key, r.kr, x);
+          clipLeft(r.val, r.vr, x);
+        } else {
+          const x = lerp(r.x0, r.x1, f);
+          clipRight(r.key, r.kr, x);
+          clipRight(r.val, r.vr, x);
+        }
+      });
+
+      // Builder 2: arrows drop in while the builder hovers over each row
+      const arrowsFr = evalPath(paths.arrows, workProgress("arrows", time)).fr;
+      geo.rows.forEach((r, i) => {
+        r.key.style.removeProperty("--arrow-drop");
+        r.key.style.setProperty("--arrow", clamp((arrowsFr[i] - 0.35) / 0.3).toFixed(3));
+      });
+
+      // Builder 3: ink the name, line by line (staircase clip)
+      const nameFr = evalPath(paths.name, workProgress("name", time)).fr;
+      const { box, lines, fontSize } = geo.name;
+      const pts = [];
+      const edge = (i) => {
+        const l = lines[i], f = nameFr[i];
+        if (f <= 0) return -20;
+        return (f >= 1 ? l.x1 + 30 : lerp(l.x0, l.x1, f)) - box.x0;
+      };
+      pts.push(`-20px ${nameBand(0)}px`);
+      lines.forEach((_, i) => {
+        pts.push(`${edge(i)}px ${nameBand(i)}px`);
+        pts.push(`${edge(i)}px ${i === lines.length - 1 ? box.bottom - box.top + fontSize : nameBand(i + 1)}px`);
+      });
+      pts.push(`-20px ${box.bottom - box.top + fontSize}px`);
+      nameEl.style.setProperty("--ink-clip", `polygon(${pts.join(", ")})`);
+
+      // Builder 4: paint the buttons
+      const btnFr = evalPath(paths.buttons, workProgress("buttons", time)).fr;
+      geo.buttons.forEach((b, i) => {
+        const s = b.el.style;
+        s.setProperty("--paint", btnFr[i].toFixed(3));
+        s.setProperty("--paint-x", btnFr[i].toFixed(3));
+        s.setProperty("--paint-y", "1");
+        s.setProperty("--paint-pos", "left");
+        b.el.toggleAttribute("data-bare", btnFr[i] < 1);
+      });
+    }
+
+    /* ========================================
+       Crew rendering (one overlay canvas, drawn in device pixels so
+       the pixel art stays crisp at fractional DPRs). The wave front and
+       its runoff are drawn here too, since they pass over the intro.
+       ======================================== */
+    const crewCtx = crewCanvas.getContext("2d");
+    let crewDirty = false;
+
+    function sizeCanvas(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.round(geo.W * dpr), h = Math.round(geo.H * dpr);
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+      return dpr;
+    }
+
+    function drawSprite(ctx, rows, x, y, px, flip) {
+      const h = rows.length, w = Math.max(...rows.map((r) => r.length));
+      const ox = Math.round(x - (w * px) / 2), oy = Math.round(y - h * px);
+      const at = (cx, cy) => {
+        if (cy < 0 || cy >= h || cx < 0 || cx >= w) return ".";
+        return rows[cy][flip ? w - 1 - cx : cx] || ".";
+      };
+      ctx.fillStyle = C.k;
+      for (let cy = -1; cy <= h; cy++) {
+        for (let cx = -1; cx <= w; cx++) {
+          if (at(cx, cy) !== ".") continue;
+          if (at(cx + 1, cy) !== "." || at(cx - 1, cy) !== "." || at(cx, cy + 1) !== "." || at(cx, cy - 1) !== ".") {
+            ctx.fillRect(ox + cx * px, oy + cy * px, px, px);
+          }
+        }
+      }
+      for (let cy = 0; cy < h; cy++) {
+        for (let cx = 0; cx < w; cx++) {
+          const ch = at(cx, cy);
+          if (ch === "." || !C[ch]) continue;
+          ctx.fillStyle = C[ch];
+          ctx.fillRect(ox + cx * px, oy + cy * px, px, px);
+        }
+      }
+    }
+
+    function drawTrail(ctx, m, x, y, px, dir, time, frame) {
+      if (m.trail === "spray") {
+        ctx.fillStyle = C.s;
+        for (let k = 1; k <= 3; k++) {
+          ctx.globalAlpha = 0.9 - k * 0.22;
+          const sx = x - dir * (16 + k * 5) * px / 2;
+          const sy = y - (2 + ((k + frame) % 2) * 3 + Math.sin(time * 20 + k) * 1.5) * px / 2;
+          ctx.fillRect(Math.round(sx), Math.round(sy), px, px);
+        }
+      } else if (m.trail === "drips") {
+        ctx.fillStyle = C.a;
+        for (let k = 0; k < 3; k++) {
+          const phase = (time * 3 + k / 3) % 1;
+          ctx.globalAlpha = 1 - phase;
+          ctx.fillRect(Math.round(x + dir * 4 * px), Math.round(y - 3 * px + phase * 8 * px), px, px);
+        }
+      } else if (m.trail === "chalk") {
+        ctx.fillStyle = C.w;
+        for (let k = 1; k <= 3; k++) {
+          ctx.globalAlpha = 0.7 - k * 0.2;
+          ctx.fillRect(Math.round(x - dir * (8 + k * 6) * px / 2), Math.round(y - (4 + ((k + frame) % 2) * 4) * px / 2), px + 1, px + 1);
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // The breaking front: a wet sheen behind it, curls on the swell rows, spray ahead
+    function drawWaveFront(ctx, time) {
+      const [a, b] = TIMELINE.wave;
+      if (time <= a || time >= b) return;
+
+      ctx.fillStyle = C.bg;
+      for (let k = 0; k < 6; k++) {
+        ctx.globalAlpha = 0.16 * (1 - k / 6);
+        ctx.beginPath();
+        for (let y = -10; y <= geo.H + 10; y += 20) ctx.lineTo(crestAt(y, time) - k * 26, y);
+        for (let y = geo.H + 10; y >= -10; y -= 20) ctx.lineTo(crestAt(y, time) - (k + 1) * 26 - 30, y);
+        ctx.fill();
+      }
+
+      ctx.lineCap = "round";
+      swellRows(geo.H, time).forEach((L) => {
+        if (L.s < 0.25 || L.y > geo.H) return;
+        const x = crestAt(L.y, time), y = L.y, z = 5 + 11 * L.s;
+        ctx.lineWidth = 1 + L.s;
+        ctx.strokeStyle = L.id % 3 === 1 ? C.a : C.k;
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(x - z * 2.2, y + z * 0.35);
+        ctx.quadraticCurveTo(x - z * 0.6, y - z * 0.9, x + z * 0.3, y - z * 0.2);
+        ctx.quadraticCurveTo(x + z * 0.45, y + z * 0.3, x - z * 0.1, y + z * 0.15);
+        ctx.stroke();
+        for (let e = 1; e <= 2; e++) {
+          const ex = x - z * 2.6 * e;
+          ctx.globalAlpha = 0.45 / e;
+          ctx.beginPath();
+          ctx.moveTo(ex - z * 1.6, y + z * 0.3);
+          ctx.quadraticCurveTo(ex - z * 0.6, y - z * 0.5, ex + z * 0.3, y + z * 0.1);
+          ctx.stroke();
+        }
+      });
+
+      for (let j = 0; j < 24; j++) {
+        const ph = (time * 1.6 + hash(j)) % 1;
+        const y = geo.H * (0.05 + 0.9 * hash(j + 40));
+        ctx.globalAlpha = 1 - ph;
+        ctx.fillStyle = j % 3 ? C.s : C.a;
+        ctx.fillRect(crestAt(y, time) + 6 + ph * 46, y - Math.sin(ph * Math.PI) * 16, 2, 2);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Ink drips off the name and paint runs off the primary button as the crest passes
+    function drawRunoff(ctx, time) {
+      const { lines, fontSize } = geo.name;
+      ctx.fillStyle = C.k;
+      lines.forEach((l, li) => {
+        for (let x = l.x0 + 8, n = 0; x < l.x1 - 4; x += 15, n++) {
+          const j = hash(li * 53 + n), j2 = hash(li * 71 + n + 9);
+          if (j < 0.4) continue;
+          const age = time - crestTimeAt(x + WAVE.lag, l.base) - 0.03 - j2 * 0.22;
+          const life = 0.35 + 0.4 * j;
+          if (age < 0 || age > life) continue;
+          ctx.globalAlpha = 1 - age / life;
+          const sz = j > 0.75 ? 3 : 2;
+          const y0 = l.base - fontSize * (0.05 + 0.3 * j2);
+          ctx.fillRect(x + (j - 0.5) * 8, y0 + 20 * age + (300 + 700 * j2) * age * age, sz, sz + Math.min(6, age * 20));
+        }
+      });
+
+      ctx.fillStyle = C.a;
+      geo.buttons.forEach((b) => {
+        if (!b.primary) return;
+        for (let x = b.x0 + 5, n = 0; x < b.x1 - 3; x += 7, n++) {
+          const j = hash(n + 300);
+          const age = time - crestTimeAt(x, b.bottom) - 0.05 - j * 0.12;
+          const life = 0.5 + 0.3 * j;
+          if (age < 0 || age > life) continue;
+          ctx.globalAlpha = 1 - age / life;
+          ctx.fillRect(x, b.bottom + 600 * age * age, 2, 3 + Math.min(10, age * 30));
+        }
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function drawCrew(time) {
+      const dpr = sizeCanvas(crewCanvas);
+      const ctx = crewCtx;
+      const inBuild = time < END;
+      const actors = inBuild ? crew.map((m) => ({ m, pos: actorAt(m, time) })).filter((a) => a.pos) : [];
+      const waveOn = inBuild && time > TIMELINE.wave[0] && time < TIMELINE.wave[1] + 0.8;
+      if (!actors.length && !waveOn && !crewDirty) return;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, crewCanvas.width, crewCanvas.height);
+      crewDirty = actors.length > 0 || waveOn;
+
+      if (waveOn) {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        drawRunoff(ctx, time);
+        drawWaveFront(ctx, time);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+      }
+
+      const px = Math.max(1, Math.round(spritePx * dpr));
+      actors.forEach(({ m, pos }) => {
+        const rate = m.motion === "fly" ? 9 : 7;
+        const frame = Math.floor(time * rate) % 2;
+        const rows = m.frames[frame] || m.frames[0];
+        const x = pos.x * dpr, y = pos.y * dpr;
+        ctx.globalAlpha = pos.alpha;
+        if (m.trail) drawTrail(ctx, m, x, y, px, pos.dir, time, frame);
+        ctx.globalAlpha = pos.alpha;
+        drawSprite(ctx, rows, x, y, px, pos.dir < 0);
+        ctx.globalAlpha = 1;
+      });
+    }
+
+    /* ========================================
+       Crest-mode swell rows at time `time`: squeezed toward a horizon just above
+       the stage and drifting slowly toward the viewer. s is the local scale
+       (1 = the nearest row); id stays with a row as it drifts.
+       ======================================== */
+    function swellRows(H, time) {
+      const n = Math.round(clamp(H / GRID.rowGap, 12, 32));
+      const drift = time * GRID.approach;
+      const shift = Math.floor(drift), frac = drift - shift;
+      const out = [];
+      for (let k = 0; k <= n; k++) {
+        const f = (k + frac) / n;
+        if (f <= 0) continue;
+        out.push({ y: H * (-0.05 + 1.1 * Math.pow(f, GRID.depth)), s: Math.pow(f, GRID.depth - 1), id: k - shift });
+      }
+      return out;
+    }
+
+    /* ========================================
+       Surface: one canvas behind the intro. Four modes to compare:
+       crest   - perspective swell rows drawn as broken crest strokes (default)
+       swell   - evenly spaced ruled lines on the water (old)
+       ripple  - the dot grid on the same water (dots refract and glint)
+       crumple - the original spring dots (old)
+       The water is a coarse 2D wave equation that runs on the build's clock:
+       the opening wave is a crest driven through it, so its leftover ripples
+       stay behind the build. From TIMELINE.water the pointer drags a wake
+       through it and a click splashes.
+       ======================================== */
+    const grid = (() => {
+      const ctx = gridCanvas.getContext("2d");
+      const STEP = 1 / 60;
+      let shown = false;        // canvas visible: from the wave onward
+      let interactive = false;  // pointer moves the water: from TIMELINE.water
+      let awake = false;
+      let visible = true;
+      let pointer = null;
+      let wt = 0;               // water time, on the build's clock
+      let acc = 0;
+      let energy = 0;
+      let cols = 0, rows = 0, cur = null, prev = null, sponge = null;
+      let dots = [];
+
+      const isWater = () => GRID.mode !== "crumple";
+      const ambientOn = () => isWater() && GRID.swell > 0 && !isReduced();
+      // The ambient swell builds up behind the opening wave
+      const swellAmp = () => GRID.swell * smooth(clamp((wt - TIMELINE.wave[0]) / 1.6));
+
+      function rebuild() {
+        if (!geo) return;
+        cols = Math.ceil(geo.W / GRID.cell) + 3;
+        rows = Math.ceil(geo.H / GRID.cell) + 3;
+        cur = new Float32Array(cols * rows);
+        prev = new Float32Array(cols * rows);
+        // Absorbing edges: waves fade out in the outer cells instead of bouncing back
+        sponge = new Float32Array(cols * rows);
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            const d = Math.min(x, y, cols - 1 - x, rows - 1 - y);
+            sponge[y * cols + x] = GRID.calm * (d >= 6 ? 1 : 0.86 + 0.14 * (d / 6));
+          }
+        }
+        dots = [];
+        const { gap } = GRID;
+        const ox = (geo.W % gap) / 2 + gap / 2, oy = gap / 2;
+        for (let y = oy; y < geo.H; y += gap) {
+          for (let x = ox; x < geo.W; x += gap) {
+            dots.push({ rx: x, ry: y, x, y, vx: 0, vy: 0, j: Math.random() * 2 - 1 });
+          }
+        }
+        energy = 0;
+        draw();
+      }
+
+      /* ---------- Water ---------- */
+
+      // Bilinear height at a stage point
+      function sample(x, y) {
+        const fx = clamp(x / GRID.cell + 1, 0, cols - 1.001);
+        const fy = clamp(y / GRID.cell + 1, 0, rows - 1.001);
+        const x0 = fx | 0, y0 = fy | 0, tx = fx - x0, ty = fy - y0;
+        const i = y0 * cols + x0;
+        const top = cur[i] + (cur[i + 1] - cur[i]) * tx;
+        const bot = cur[i + cols] + (cur[i + cols + 1] - cur[i + cols]) * tx;
+        return top + (bot - top) * ty;
+      }
+
+      function ambient(x, y) {
+        const amp = swellAmp();
+        if (!amp) return 0;
+        return amp * (
+          Math.sin(x * 0.011 + wt * 0.9 + y * 0.045) * 0.6 +
+          Math.sin(x * 0.026 - wt * 1.3 + y * 0.1) * 0.4
+        );
+      }
+
+      // 9-point Laplacian so ripples spread as circles instead of diamonds
+      function simStep() {
+        let max = 0;
+        for (let y = 1; y < rows - 1; y++) {
+          for (let x = 1; x < cols - 1; x++) {
+            const i = y * cols + x;
+            const c = cur[i];
+            const edges = cur[i - 1] + cur[i + 1] + cur[i - cols] + cur[i + cols];
+            const corners = cur[i - cols - 1] + cur[i - cols + 1] + cur[i + cols - 1] + cur[i + cols + 1];
+            const lap = (4 * edges + corners - 20 * c) / 6;
+            const v = (2 * c - prev[i] + 0.5 * lap) * sponge[i];
+            prev[i] = v;
+            const a = v < 0 ? -v : v;
+            if (a > max) max = a;
+          }
+        }
+        const swap = cur; cur = prev; prev = swap;
+        return max;
+      }
+
+      function inject(x, y, amount) {
+        const r = Math.max(1.5, GRID.radius / 40);
+        const cx = x / GRID.cell + 1, cy = y / GRID.cell + 1;
+        for (let gy = Math.floor(cy - r); gy <= Math.ceil(cy + r); gy++) {
+          for (let gx = Math.floor(cx - r); gx <= Math.ceil(cx + r); gx++) {
+            if (gx < 1 || gy < 1 || gx >= cols - 1 || gy >= rows - 1) continue;
+            const d = Math.hypot(gx - cx, gy - cy);
+            if (d < r) cur[gy * cols + gx] -= amount * 0.5 * (1 + Math.cos(Math.PI * d / r));
+          }
+        }
+      }
+
+      // Drag a wake from a to b: one push per cell crossed, so faster = bigger wake
+      function wake(a, b) {
+        const dist = Math.hypot(b.x - a.x, b.y - a.y);
+        const n = Math.min(40, Math.ceil(dist / GRID.cell));
+        for (let k = 1; k <= n; k++) {
+          inject(lerp(a.x, b.x, k / n), lerp(a.y, b.y, k / n), GRID.strength * 0.05);
+        }
+      }
+
+      // The build's hand on the water: the opening crest, and the surfer's wake when riding in
+      function force(time) {
+        const [a, b] = TIMELINE.wave;
+        if (time >= a && time <= b && WAVE.height > 0) {
+          // Grip the water gently at the start and let go gently at the end
+          const grip = 0.3 * Math.min(1, (time - a) / 0.15, (b - time) / 0.5);
+          const sig = WAVE.width / GRID.cell;
+          for (let gy = 1; gy < rows - 1; gy++) {
+            const cx = crestAt((gy - 1) * GRID.cell, time) / GRID.cell + 1;
+            const x0 = Math.max(1, Math.floor(cx - sig * 2.5)), x1 = Math.min(cols - 2, Math.ceil(cx + sig * 2.5));
+            for (let gx = x0; gx <= x1; gx++) {
+              const d = (gx - cx) / sig;
+              const i = gy * cols + gx;
+              cur[i] += (WAVE.height * Math.exp(-d * d) - cur[i]) * grip;
+            }
+          }
+        }
+        if (WAVE.ride) {
+          const m = crew.find((c) => c.job === "rows");
+          const p = time < TIMELINE.rows[0] + TIMELINE.enter ? rideIn(m, time) : null;
+          if (p) inject(p.x, p.y + 4, 0.5);
+        }
+      }
+
+      function advance(dt) {
+        acc += dt;
+        while (acc >= STEP) {
+          force(wt);
+          energy = simStep();
+          wt += STEP;
+          acc -= STEP;
+        }
+      }
+
+      // Put the water where it would be at build time `time`. calm = skip the wave.
+      function seek(time, calm = false) {
+        reset();
+        wt = Math.min(time, TIMELINE.wave[0]);
+        if (!calm && isWater() && cur) {
+          while (wt + STEP <= time) { force(wt); energy = simStep(); wt += STEP; }
+        }
+        wt = time;
+        draw();
+      }
+
+      const soft = (h) => 8 * Math.tanh((h * GRID.lift) / 8);
+
+      // Perspective swells as broken crest strokes: only high water gets a short
+      // curved stroke. Rows thin and fade toward the horizon.
+      function drawCrests() {
+        const amp = swellAmp();
+        const ph = wt * 0.9;
+        const step = 4;
+        const run = [];
+        // Quiet behind the build; once the water is live, small wakes show and glint
+        const live = wt >= TIMELINE.water;
+        const open0 = live ? 0.8 : 3, hot0 = live ? 3.5 : 16;
+        ctx.lineCap = "round";
+
+        const flush = (L, lam) => {
+          const n = run.length / 3;
+          if (n >= 2) {
+            let hi = 0;
+            for (let k = 2; k < run.length; k += 3) hi = Math.max(hi, run[k]);
+            const bulge = (0.8 + 2.4 * L.s) * Math.min(1, ((n - 1) * step) / (lam * 0.3));
+            const hot = clamp((hi - hot0) / 10);
+            ctx.strokeStyle = hot > 0.15 ? C.a : C.dotActive;
+            ctx.globalAlpha = Math.min(0.9, 0.14 + 0.4 * L.s + hot * 0.5);
+            ctx.lineWidth = 0.6 + L.s;
+            ctx.beginPath();
+            for (let k = 0; k < n; k++) {
+              const y = run[k * 3 + 1] - bulge * Math.sin((Math.PI * k) / (n - 1));
+              if (k) ctx.lineTo(run[k * 3], y); else ctx.moveTo(run[k * 3], y);
+            }
+            ctx.stroke();
+          }
+          run.length = 0;
+        };
+
+        for (const L of swellRows(geo.H, wt)) {
+          if (L.y < -2 || L.y > geo.H + 12) continue;
+          const lam = GRID.wavelength * L.s * (0.85 + 0.3 * hash(L.id + 13));
+          const k1 = TAU / lam, k2 = TAU / (lam * 0.47), kE = TAU / (lam * 5.3);
+          const p1 = hash(L.id) * TAU, p2 = hash(L.id + 31) * TAU, p3 = hash(L.id + 67) * TAU;
+          const depth = 0.35 + 0.65 * L.s;
+          for (let x = -step * 2; x <= geo.W + step * 2; x += step) {
+            const a = 0.7 * Math.sin(k1 * x + p1 - ph) + 0.3 * Math.sin(k2 * x + p2 + ph * 1.4);
+            const env = 0.5 + 0.5 * Math.sin(kE * x + p3 + ph * 0.12);
+            const h = sample(x, L.y);
+            const hv = h * GRID.lift;
+            // Raised water opens the gaps and lengthens strokes, but never draws solid lines
+            const boost = 0.6 * smooth(clamp((Math.abs(hv) - open0) / 10));
+            if (a - (1 - env) * 0.9 * (1 - boost / 0.6) + boost > GRID.crest) {
+              run.push(x, L.y - a * amp * L.s - soft(h) * depth, hv);
+            } else if (run.length) flush(L, lam);
+          }
+          if (run.length) flush(L, lam);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawSwell() {
+        const gap = GRID.lineGap, step = GRID.cell;
+        const lines = [];
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = C.dot;
+        for (let y0 = gap / 2; y0 < geo.H + gap; y0 += gap) {
+          const pts = [];
+          ctx.beginPath();
+          for (let x = -step; x <= geo.W + step; x += step) {
+            const h = sample(x, y0);
+            const y = y0 + soft(h) + ambient(x, y0);
+            pts.push(x, y, h);
+            if (x === -step) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          lines.push(pts);
+        }
+        // Crests catch a little terracotta
+        ctx.strokeStyle = C.a;
+        ctx.lineWidth = 1.25;
+        for (const pts of lines) {
+          for (let k = 3; k < pts.length; k += 3) {
+            const h = Math.abs(pts[k + 2]);
+            if (h < 1.6) continue;
+            ctx.globalAlpha = Math.min(0.5, (h - 1.6) / 8);
+            ctx.beginPath();
+            ctx.moveTo(pts[k - 3], pts[k - 2]);
+            ctx.lineTo(pts[k], pts[k + 1]);
+            ctx.stroke();
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawRippleDots() {
+        const r = GRID.dot, c = GRID.cell;
+        const glints = [];
+        ctx.fillStyle = C.dot;
+        for (const d of dots) {
+          const h = sample(d.rx, d.ry);
+          const gx = sample(d.rx + c, d.ry) - sample(d.rx - c, d.ry);
+          const gy = sample(d.rx, d.ry + c) - sample(d.rx, d.ry - c);
+          const x = d.rx + soft(gx * 1.5);
+          const y = d.ry + soft(gy * 1.5) + ambient(d.rx, d.ry) * 0.4;
+          if (h > -0.8) ctx.fillRect(x - r, y - r, r * 2, r * 2);
+          else glints.push(x, y, -h);
+        }
+        ctx.fillStyle = C.a;
+        for (let k = 0; k < glints.length; k += 3) {
+          const s = r * (1 + Math.min(0.8, glints[k + 2] / 8));
+          ctx.globalAlpha = Math.min(0.85, 0.25 + glints[k + 2] / 6);
+          ctx.fillRect(glints[k] - s, glints[k + 1] - s, s * 2, s * 2);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      /* ---------- Crumple (original) ---------- */
+
+      function stepCrumple(dt) {
+        const { radius, strength, stiffness, damping, swirl } = GRID;
+        let moving = false;
+        for (const d of dots) {
+          let tx = d.rx, ty = d.ry;
+          if (pointer) {
+            const dx = d.rx - pointer.x, dy = d.ry - pointer.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < radius && dist > 0.01) {
+              let f = 1 - dist / radius;
+              f = f * f * (3 - 2 * f);
+              const push = strength * f;
+              const nx = dx / dist, ny = dy / dist;
+              tx += nx * push - ny * push * d.j * swirl;
+              ty += ny * push + nx * push * d.j * swirl;
+            }
+          }
+          d.vx += ((tx - d.x) * stiffness - d.vx * damping) * dt;
+          d.vy += ((ty - d.y) * stiffness - d.vy * damping) * dt;
+          d.x += d.vx * dt;
+          d.y += d.vy * dt;
+          if (Math.abs(d.vx) + Math.abs(d.vy) > 0.05 || Math.abs(d.x - tx) + Math.abs(d.y - ty) > 0.05) moving = true;
+          else { d.x = tx; d.y = ty; d.vx = 0; d.vy = 0; }
+        }
+        return moving || !!pointer;
+      }
+
+      function drawCrumple() {
+        const r = GRID.dot;
+        ctx.fillStyle = C.dot;
+        for (const d of dots) {
+          if (Math.abs(d.x - d.rx) + Math.abs(d.y - d.ry) < 2) ctx.fillRect(d.x - r, d.y - r, r * 2, r * 2);
+        }
+        ctx.fillStyle = C.dotActive;
+        ctx.globalAlpha = 0.75;
+        for (const d of dots) {
+          const disp = Math.abs(d.x - d.rx) + Math.abs(d.y - d.ry);
+          if (disp >= 2) {
+            const s = r * (1 + Math.min(0.5, disp / 60));
+            ctx.fillRect(d.x - s, d.y - s, s * 2, s * 2);
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      /* ---------- Loop ---------- */
+
+      function draw() {
+        if (!geo || !cur) return;
+        const dpr = sizeCanvas(gridCanvas);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, geo.W, geo.H);
+        if (GRID.mode === "crest") drawCrests();
+        else if (GRID.mode === "swell") drawSwell();
+        else if (GRID.mode === "ripple") drawRippleDots();
+        else drawCrumple();
+      }
+
+      // Advance the water by dt seconds of build time (or real time once the build is over)
+      function tick(dt) {
+        if (!awake) return false;
+        if (!isWater()) {
+          awake = stepCrumple(dt / 2);
+          awake = stepCrumple(dt / 2) || awake;
+          wt += dt;
+        } else {
+          advance(dt);
+          awake = energy > 0.01 || ambientOn();
+        }
+        awake = awake && shown && visible;
+        draw();
+        return awake;
+      }
+
+      function start() {
+        if (!shown || !visible) return;
+        awake = true;
+        kick();
+      }
+
+      function toLocal(clientX, clientY) {
+        const r = gridCanvas.getBoundingClientRect();
+        return { x: clientX - r.left, y: clientY - r.top };
+      }
+
+      function setPointer(clientX, clientY) {
+        if (!interactive || isReduced()) return;
+        const p = toLocal(clientX, clientY);
+        if (isWater() && pointer) wake(pointer, p);
+        pointer = p;
+        start();
+      }
+
+      function clearPointer() {
+        if (!pointer) return;
+        pointer = null;
+        start();
+      }
+
+      function splash(clientX, clientY) {
+        if (!interactive || isReduced() || !isWater()) return;
+        const p = toLocal(clientX, clientY);
+        inject(p.x, p.y, GRID.strength * 0.4);
+        start();
+      }
+
+      function reset() {
+        pointer = null;
+        acc = 0;
+        if (cur) { cur.fill(0); prev.fill(0); }
+        dots.forEach((d) => { d.x = d.rx; d.y = d.ry; d.vx = d.vy = 0; });
+        energy = 0;
+      }
+
+      // Visible from the wave onward, answers the pointer from TIMELINE.water
+      function setStage(time) {
+        const show = gridEnabled && time >= TIMELINE.wave[0];
+        if (show !== shown) {
+          shown = show;
+          gridCanvas.classList.toggle("is-live", show);
+          if (show) start();
+        }
+        const inter = time >= TIMELINE.water;
+        if (inter !== interactive) {
+          interactive = inter;
+          if (!inter) pointer = null;
+        }
+      }
+
+      function setMode(mode) {
+        GRID.mode = mode;
+        seek(t, t >= END);
+        start();
+      }
+
+      new IntersectionObserver(([e]) => { visible = e.isIntersecting; start(); }).observe(stage);
+      document.addEventListener("visibilitychange", () => { visible = !document.hidden; start(); });
+
+      stage.addEventListener("pointermove", (e) => { if (e.pointerType !== "touch") setPointer(e.clientX, e.clientY); });
+      stage.addEventListener("pointerleave", (e) => { if (e.pointerType !== "touch") clearPointer(); });
+      stage.addEventListener("pointerdown", (e) => { if (!e.target.closest("a, button")) splash(e.clientX, e.clientY); });
+      stage.addEventListener("touchstart", (e) => setPointer(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+      stage.addEventListener("touchmove", (e) => setPointer(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+      stage.addEventListener("touchend", clearPointer, { passive: true });
+      stage.addEventListener("touchcancel", clearPointer, { passive: true });
+
+      return { rebuild, draw, tick, seek, setStage, setMode, clearPointer, start };
+    })();
+
+    /* ========================================
+       Clock
+       ======================================== */
+    let rafId = 0;
+    let last = 0;
+
+    function kick() {
+      if (!rafId) rafId = requestAnimationFrame(frame);
+    }
+
+    function frame(now) {
+      rafId = 0;
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
+      last = now;
+      let more = false;
+
+      if (playing) {
+        // The water runs on the build's clock, so it follows speed and pauses with it
+        t = Math.min(END, t + dt * speed);
+        apply(t);
+        grid.tick(dt * speed);
+        if (t >= END) playing = false;
+        more = true;
+        syncPanel();
+      } else if (t >= END) {
+        more = grid.tick(dt);
+      }
+
+      if (more) kick();
+      else last = 0;
+    }
+
+    function play() {
+      if (isReduced()) return finish();
+      try { sessionStorage.setItem("hero-build-seen", "1"); } catch (e) {}
+      t = 0;
+      playing = true;
+      grid.seek(t);
+      apply(t);
+      syncPanel();
+      kick();
+    }
+
+    // Skip, Escape, reduced motion, repeat visits: the finished intro on still water
+    function finish() {
+      playing = false;
+      t = END;
+      grid.seek(t, true);
+      apply(t);
+      syncPanel();
+      grid.start();
+    }
+
+    skipBtn.addEventListener("click", finish);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && building) { finish(); return; }
+      // Prototype shortcuts
+      if (e.target.closest("input, select, textarea, button")) return;
+      if (e.key === "r" || e.key === "R") play();
+      if (e.key === " ") { e.preventDefault(); togglePlay(); }
+    });
+
+    /* ========================================
+       Dev panel (prototype only)
+       ======================================== */
+    const $ = (id) => document.getElementById(id);
+    const scrub = $("dev-scrub");
+    scrub.max = END;
+
+    function syncPanel() {
+      scrub.value = t;
+      $("dev-scrub-out").textContent = t.toFixed(2) + "s";
+      $("dev-play").textContent = playing ? "pause" : "play";
+      let seen = "unset";
+      try { seen = sessionStorage.getItem("hero-build-seen") === "1" ? "set" : "unset"; } catch (e) { seen = "unavailable"; }
+      $("dev-status").textContent = `session flag: ${seen}${isReduced() ? " · reduced motion" : ""}`;
+    }
+
+    function togglePlay() {
+      if (playing) { playing = false; syncPanel(); return; }
+      if (t >= END) return play();
+      playing = true;
+      kick();
+      syncPanel();
+    }
+
+    $("dev-replay").addEventListener("click", play);
+    $("dev-play").addEventListener("click", togglePlay);
+    $("dev-skip").addEventListener("click", finish);
+
+    scrub.addEventListener("input", () => {
+      playing = false;
+      t = parseFloat(scrub.value);
+      grid.seek(t);
+      apply(t);
+      syncPanel();
+      if (t >= END) grid.start();
+    });
+
+    $("dev-speed").addEventListener("input", (e) => {
+      speed = parseFloat(e.target.value);
+      $("dev-speed-out").textContent = speed.toFixed(2) + "×";
+    });
+
+    $("dev-crew").addEventListener("change", (e) => {
+      crew = CREWS[e.target.value];
+      paths = buildPaths();
+      play();
+    });
+
+    $("dev-px").addEventListener("change", (e) => {
+      spritePx = parseInt(e.target.value, 10);
+      crewDirty = true;
+      apply(t);
+    });
+
+    $("dev-photo").addEventListener("change", (e) => {
+      $("photo-frame").dataset.photo = e.target.value;
+    });
+
+    $("dev-grid").addEventListener("change", (e) => {
+      gridEnabled = e.target.checked;
+      apply(t);
+    });
+
+    $("dev-strength").addEventListener("input", (e) => {
+      GRID.strength = parseFloat(e.target.value);
+      $("dev-strength-out").textContent = e.target.value;
+    });
+
+    $("dev-surface").addEventListener("change", (e) => grid.setMode(e.target.value));
+
+    $("dev-wave").addEventListener("input", (e) => {
+      WAVE.height = parseFloat(e.target.value);
+      $("dev-wave-out").textContent = e.target.value;
+    });
+    $("dev-wave").addEventListener("change", play);
+
+    $("dev-ride").addEventListener("change", (e) => {
+      WAVE.ride = e.target.checked;
+      play();
+    });
+
+    $("dev-swell").addEventListener("input", (e) => {
+      GRID.swell = parseFloat(e.target.value);
+      $("dev-swell-out").textContent = e.target.value;
+      grid.start();
+      grid.draw();
+    });
+
+    $("dev-calm").addEventListener("input", (e) => {
+      GRID.calm = parseFloat(e.target.value);
+      $("dev-calm-out").textContent = e.target.value;
+    });
+
+    $("dev-radius").addEventListener("input", (e) => {
+      GRID.radius = parseFloat(e.target.value);
+      $("dev-radius-out").textContent = e.target.value;
+    });
+
+    $("dev-rm").addEventListener("change", (e) => {
+      simReduced = e.target.checked;
+      grid.clearPointer();
+      finish();
+    });
+
+    $("dev-theme").addEventListener("click", () => {
+      const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("theme", next); } catch (e) {}
+    });
+
+    $("dev-seen").addEventListener("click", () => {
+      try { sessionStorage.removeItem("hero-build-seen"); } catch (e) {}
+      syncPanel();
+    });
+
+    const dev = $("dev");
+    $("dev-collapse").addEventListener("click", (e) => {
+      const collapsed = dev.classList.toggle("is-collapsed");
+      e.currentTarget.textContent = collapsed ? "+" : "–";
+      e.currentTarget.setAttribute("aria-expanded", String(!collapsed));
+    });
+    if (window.innerWidth < 600) $("dev-collapse").click();
+
+    /* ========================================
+       Boot
+       ======================================== */
+    function relayout() {
+      measure();
+      grid.rebuild();
+      crewDirty = true;
+      grid.seek(t, t >= END);
+      apply(t);
+      if (t >= END) grid.start();
+    }
+
+    readColors();
+    measure();
+    grid.rebuild();
+
+    // Prototype: ?t=2.4 freezes the build at that second, ?theme=dark forces a theme
+    const qs = new URLSearchParams(location.search);
+    if (qs.get("theme")) root.setAttribute("data-theme", qs.get("theme"));
+    if (qs.has("t")) {
+      readColors();
+      root.classList.remove("hero-building");
+      building = false;
+      t = clamp(parseFloat(qs.get("t")) || 0, 0, END);
+      grid.seek(t);
+      apply(t);
+      syncPanel();
+      if (t >= END) grid.start();
+    } else if (building) {
+      building = false; // let setBuilding() run its side effects
+      play();
+    } else {
+      finish();
+    }
+
+    document.fonts?.ready.then(relayout);
+    let resizeRaf = 0;
+    window.addEventListener("resize", () => {
+      cancelAnimationFrame(resizeRaf);
+      resizeRaf = requestAnimationFrame(relayout);
+    });
+    new MutationObserver(() => { readColors(); grid.draw(); crewDirty = true; apply(t); })
+      .observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    reducedQuery.addEventListener("change", finish);
+  })();
+  </script>
+</body>
+</html>

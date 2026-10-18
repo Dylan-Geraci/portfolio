@@ -68,6 +68,8 @@ button {
   --color-accent-soft: #C45D3E1A;
   --color-accent-deep: #A8482E;
   --color-border: #E5DED6;
+  --color-sand: #E4CDAA;
+  --color-paper: #FFFFFF;
 
   --font-heading: "Bricolage Grotesque", sans-serif;
   --font-body: "DM Sans", sans-serif;
@@ -97,6 +99,8 @@ button {
   --color-accent-soft: #D4755A1A;
   --color-accent-deep: #E08E73;
   --color-border: #3A3530;
+  --color-sand: #C9AE8C;
+  --color-paper: #F4ECE0;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);

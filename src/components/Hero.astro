@@ -4,54 +4,58 @@ import { meta, about } from "../content";
 const specs = [
   { key: "based", value: "Southern California" },
   { key: "focus", value: "Full-stack systems" },
+  { key: "role", value: "AI SWE @ Internet Brands" },
 ];
 ---
 
-<section class="site-container hero" aria-label="Introduction">
-  <div class="hero-text">
-    <p class="hero-eyebrow mono-label hero-enter" style="--i: 0">
-      Software Engineer
-    </p>
-    <h1 class="hero-name hero-enter" style="--i: 1">{meta.name}</h1>
+<!-- The intro is plain HTML. src/scripts/hero-build.ts plays the wave and the
+     crew on top of it, using the two canvases and the hero-building class. -->
+<div class="hero-stage" id="hero-stage">
+  <canvas class="hero-water" aria-hidden="true"></canvas>
 
-    <dl class="hero-specs hero-enter" style="--i: 2">
-      {specs.map((s) => (
-        <div class="hero-spec-row">
-          <dt class="hero-spec-key">{s.key}</dt>
-          <dd class="hero-spec-val">{s.value}</dd>
-        </div>
-      ))}
-      <div class="hero-spec-row">
-        <dt class="hero-spec-key">status</dt>
-        <dd class="hero-spec-val hero-status">
-          <span class="status-dot" aria-hidden="true"></span>
-          Open to new-grad SWE roles
-        </dd>
+  <section class="site-container hero" aria-label="Introduction">
+    <button class="hero-skip" type="button" aria-label="Skip the intro animation">skip build →</button>
+
+    <div class="hero-text">
+      <p class="hero-eyebrow mono-label">
+        Software Engineer
+      </p>
+      <h1 class="hero-name" data-text={meta.name}>{meta.name}</h1>
+
+      <dl class="hero-specs">
+        {specs.map((s) => (
+          <div class="hero-spec-row">
+            <dt class="hero-spec-key">{s.key}</dt>
+            <dd class="hero-spec-val">{s.value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <div class="hero-actions">
+        <a href={meta.resumePath} target="_blank" rel="noopener noreferrer" class="btn-primary">
+          Resume
+        </a>
+        <a href={meta.linkedin} target="_blank" rel="noopener noreferrer" class="hero-link">
+          LinkedIn
+        </a>
+        <a href={meta.github} target="_blank" rel="noopener noreferrer" class="hero-link">
+          GitHub
+        </a>
       </div>
-    </dl>
-
-    <div class="hero-actions hero-enter" style="--i: 3">
-      <a href={meta.resumePath} target="_blank" rel="noopener noreferrer" class="btn-primary">
-        Resume
-      </a>
-      <a href={meta.linkedin} target="_blank" rel="noopener noreferrer" class="hero-link">
-        LinkedIn
-      </a>
-      <a href={meta.github} target="_blank" rel="noopener noreferrer" class="hero-link">
-        GitHub
-      </a>
     </div>
-  </div>
 
-  <div class="hero-headshot-wrapper hero-enter" style="--i: 2">
-    <div class="hero-headshot-frame">
-      <img
-        src={meta.headshotPath}
-        alt={meta.name}
-        class="hero-headshot"
-        width="240"
-        height="300"
-      />
+    <div class="hero-headshot-wrapper">
+      <div class="hero-headshot-frame">
+        <img
+          src={meta.headshotPath}
+          alt={meta.name}
+          class="hero-headshot"
+          width="240"
+          height="300"
+        />
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+
+  <canvas class="hero-crew" aria-hidden="true"></canvas>
+</div>

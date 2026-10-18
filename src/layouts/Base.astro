@@ -32,14 +32,30 @@ const { title, description = "Dylan Geraci — Software Engineer & AI/ML Enthusi
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23C45D3E'/><text x='50%25' y='50%25' font-family='serif' font-size='18' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='central'>DG</text></svg>"
     />
 
-    <!-- Inline theme script: runs synchronously to prevent flash -->
+    <!-- Inline theme script: runs synchronously to prevent flash.
+         It also gates the hero build before first paint: the links are locked
+         from the start, and reduced motion or a repeat visit skips the build. -->
     <script is:inline>
       (function () {
-        const stored = localStorage.getItem("theme");
-        if (stored) {
-          document.documentElement.setAttribute("data-theme", stored);
-        } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-          document.documentElement.setAttribute("data-theme", "dark");
+        const root = document.documentElement;
+        try {
+          const stored = localStorage.getItem("theme");
+          if (stored) {
+            root.setAttribute("data-theme", stored);
+          } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            root.setAttribute("data-theme", "dark");
+          }
+        } catch (e) {}
+
+        let seen = false;
+        try { seen = sessionStorage.getItem("hero-build-seen") === "1"; } catch (e) {}
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (!seen && !reduced) {
+          root.classList.add("hero-building");
+          // Safety net: if the build script never starts, don't leave the links locked
+          setTimeout(function () {
+            if (!window.__heroBuildStarted) root.classList.remove("hero-building");
+          }, 2500);
         }
       })();
     </script>
