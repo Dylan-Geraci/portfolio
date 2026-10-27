@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Experience Branch Map · prototype</title>
+
+  <!-- Same fonts as src/layouts/Base.astro -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- The site's real stylesheets, so tokens and experience styles stay in sync -->
+  <link rel="stylesheet" href="../src/styles/global.css" />
+  <link rel="stylesheet" href="../src/styles/layout.css" />
+  <link rel="stylesheet" href="../src/styles/components.css" />
+
+  <!-- Theme script from Base.astro. ?theme=, ?motion=reduce, ?crew=off|lifeguard|gull override for review. -->
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var q = new URLSearchParams(location.search);
+      try {
+        var stored = q.get("theme") || localStorage.getItem("theme");
+        if (stored) root.setAttribute("data-theme", stored);
+        else if (window.matchMedia("(prefers-color-scheme: dark)").matches) root.setAttribute("data-theme", "dark");
+      } catch (e) {}
+      if (q.get("motion") === "reduce") root.classList.add("force-reduced");
+    })();
+  </script>
+
+  <style>
+    /* ========================================
+       Experience branch map (port target: components.css)
+       ======================================== */
+
+    .bmap-scroll {
+      position: relative;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: thin;
+      margin: 0 -0.25rem;
+      padding: 0 0.25rem;
+    }
+
+    .bmap {
+      position: relative;
+      height: var(--h, 268px);
+    }
+
+    .bmap-lines {
+      position: absolute;
+      inset: 0;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .bmap-line {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      transition: opacity 0.25s ease, stroke-width 0.2s ease;
+    }
+
+    /* CSUF Titan Blue / Titan Orange for the school years on main; blue lifts in dark mode */
+    .bmap-scroll, .bmap-legend, .bmap-card {
+      --csuf-blue: #00244E;
+      --csuf-orange: #FF7900;
+    }
+    [data-theme="dark"] .bmap-scroll,
+    [data-theme="dark"] .bmap-legend,
+    [data-theme="dark"] .bmap-card { --csuf-blue: #5B8DD6; }
+
+    .bmap-line.is-school { stroke: var(--csuf-blue); stroke-width: 4; }
+    .bmap-line.is-school-stripe { stroke: var(--csuf-orange); stroke-width: 1.25; }
+    .bmap-line.is-work { stroke: var(--color-accent); }
+    .bmap-line.is-campus { stroke: var(--color-text-secondary); }
+    .bmap-line.is-tail { stroke-dasharray: 2 5; }
+
+    /* One role in focus: its branch gets heavier, the rest step back */
+    .bmap.has-focus .bmap-branch:not(.is-active, .is-hover) .bmap-line { opacity: 0.35; }
+    .bmap.has-focus .bmap-branch.is-trunk:not(.is-active, .is-hover) .bmap-line { opacity: 0.6; }
+    .bmap-branch.is-active .bmap-line { stroke-width: 3.25; }
+
+    /* Wide invisible stroke so the whole branch line is clickable */
+    .bmap-hit {
+      fill: none;
+      stroke: transparent;
+      stroke-width: 16;
+      pointer-events: stroke;
+      cursor: pointer;
+    }
+
+    /* Orange Coast College years on main, before the transfer to CSUF */
+    .bmap-line.is-occ { stroke: var(--color-text); stroke-width: 3; }
+
+    .bmap-main-name.is-occ { color: var(--color-text); }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+
+    /* Each role is a real button: dot + label sitting on its branch line */
+    .bmap-commit {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      padding: 0;
+      transform: translate(-9px, -50%);
+      transform-origin: 9px 50%;
+      color: var(--color-text-secondary);
+      -webkit-tap-highlight-color: transparent;
+      z-index: 1;
+    }
+
+    .bmap-commit.on-work { color: var(--color-accent); }
+    .bmap-commit.on-school { color: var(--csuf-blue); }
+    .bmap-commit.on-occ { color: var(--color-text); }
+
+    /* The degree label rides higher, in the empty campus space after graduation,
+       so it never meets the Internet Brands label on main */
+    .bmap-commit.is-tag .bmap-label {
+      left: 10px;
+      bottom: 46px;
+      color: inherit;
+    }
+
+    .bmap-dot {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    .bmap-dot::before {
+      content: "";
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--color-bg);
+      border: 2.5px solid currentColor;
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.25s ease;
+    }
+
+    .bmap-commit.is-tag .bmap-dot::before {
+      width: 10px;
+      height: 10px;
+      border-radius: 1px;
+      transform: rotate(45deg);
+    }
+
+    /* Labels ride just above their line so the line itself shows the full tenure */
+    .bmap-label {
+      position: absolute;
+      left: 16px;
+      bottom: 12px;
+      padding: 0 3px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      line-height: 1.3;
+      white-space: nowrap;
+      color: var(--color-text-secondary);
+      background: var(--color-bg);
+      border-radius: 3px;
+      transition: color 0.2s ease;
+    }
+
+
+    .bmap-commit:hover .bmap-dot::before { transform: scale(1.18); }
+    .bmap-commit.is-tag:hover .bmap-dot::before { transform: rotate(45deg) scale(1.18); }
+    .bmap-commit:hover .bmap-label { color: var(--color-text); }
+
+    .bmap-commit[aria-selected="true"] .bmap-label {
+      color: var(--color-text);
+      font-weight: 600;
+    }
+
+    .bmap-commit[aria-selected="true"] .bmap-dot::before {
+      background: currentColor;
+      box-shadow: 0 0 0 5px color-mix(in srgb, currentColor 18%, transparent);
+    }
+
+    .bmap-commit:focus-visible { outline: none; }
+    .bmap-commit:focus-visible .bmap-dot {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+      border-radius: 50%;
+    }
+
+    .bmap-main-name {
+      position: absolute;
+      padding: 0 5px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--csuf-blue);
+      padding-bottom: 5px;
+      transform: translateY(-100%);
+      pointer-events: none;
+    }
+
+    /* HEAD rides inside the current role's label, so it can never collide with it */
+    .bmap-head {
+      margin-left: 0.45rem;
+      padding: 0 0.35rem;
+      font-size: 0.62rem;
+      font-weight: 500;
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+      border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
+      border-radius: var(--radius-sm);
+    }
+
+    /* "now" marker: where the open branches are cut off today */
+    .bmap-now {
+      position: absolute;
+      top: 14px;
+      bottom: 24px;
+      border-left: 1px dashed var(--color-border);
+      pointer-events: none;
+    }
+
+    /* Year ticks along the bottom */
+    .bmap-year {
+      position: absolute;
+      bottom: 0;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      color: var(--color-text-secondary);
+      opacity: 0.8;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .bmap-year::before {
+      content: "";
+      display: block;
+      width: 1px;
+      height: 8px;
+      margin: 0 auto 4px;
+      background: var(--color-border);
+    }
+
+    .bmap-year.is-now { color: var(--color-accent); opacity: 1; }
+    .bmap-year.is-now::before { background: none; }
+
+    .bmap-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 1.1rem;
+      margin-top: 0.85rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--color-text-secondary);
+    }
+
+    .bmap-legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .bmap-legend i { display: inline-block; width: 16px; height: 0; border-top: 2.5px solid; }
+    .bmap-legend .lg-work { color: var(--color-accent); }
+    .bmap-legend .lg-campus { color: var(--color-text-secondary); }
+    .bmap-legend .lg-school { height: 4px; border: 0; background: linear-gradient(var(--csuf-blue) 0 35%, var(--csuf-orange) 35% 65%, var(--csuf-blue) 65%); }
+    .bmap-legend .lg-open { color: var(--color-text-secondary); border-top-style: dotted; }
+    .bmap-legend .lg-tag {
+      width: 8px;
+      height: 8px;
+      border: 2px solid var(--csuf-blue);
+      border-radius: 1px;
+      transform: rotate(45deg);
+    }
+
+    /* Crew member who walks to the checked-out role */
+    .bmap-crew {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      will-change: transform;
+      z-index: 2;
+    }
+
+    .bmap-crew svg { display: block; shape-rendering: crispEdges; }
+    .bmap-crew .px-k { fill: var(--color-text); }
+    .bmap-crew .px-a { fill: var(--color-accent); }
+    .bmap-crew .px-s { fill: var(--color-sand); }
+    .bmap-crew .px-w { fill: var(--color-paper); }
+
+    /* Detail card: every panel is in the DOM (SEO, no-JS); only the active one shows */
+    .bmap-card {
+      margin-top: 1.25rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1.5rem 1.6rem 1.6rem;
+    }
+
+    .bmap-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px dashed var(--color-border);
+    }
+
+    .bmap-ref {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.2rem 0.5rem;
+      min-width: 0;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--color-text-secondary);
+    }
+
+    .bmap-ref-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--color-text-secondary);
+    }
+
+    .bmap-ref.on-work .bmap-ref-dot { background: var(--color-accent); }
+    .bmap-ref.on-work .bmap-ref-branch { color: var(--color-accent); }
+    .bmap-ref.on-school .bmap-ref-dot { background: var(--csuf-blue); border-radius: 1px; transform: rotate(45deg); }
+    .bmap-ref.on-school .bmap-ref-branch { color: var(--csuf-blue); }
+    .bmap-ref.on-occ .bmap-ref-dot { background: var(--color-text); border-radius: 1px; transform: rotate(45deg); }
+    .bmap-ref.on-occ .bmap-ref-branch { color: var(--color-text); }
+    .bmap-ref-branch { white-space: nowrap; }
+    .bmap-ref-when { white-space: nowrap; }
+
+    .bmap-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-secondary);
+    }
+
+    .bmap-nav button {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .bmap-nav button:hover:not(:disabled) {
+      color: var(--color-accent);
+      border-color: var(--color-accent);
+    }
+
+    .bmap-nav button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .bmap-count { min-width: 3.2em; text-align: center; }
+
+    .bmap-panel[aria-hidden="true"] { display: none; }
+    .bmap-panel { animation: bmap-panel-in 0.25s ease both; }
+
+    @keyframes bmap-panel-in {
+      from { opacity: 0; transform: translateY(6px); }
+    }
+
+    .bmap-panel .exp-header { margin-bottom: 0.6rem; }
+
+    .bmap-edu {
+      color: var(--color-text-secondary);
+      font-size: 0.96rem;
+      line-height: 1.65;
+    }
+
+    /* Phones: the map scrolls sideways */
+    @media (max-width: 768px) {
+      .bmap-scroll {
+        mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+      }
+
+      .bmap-card { padding: 1.15rem 1.1rem 1.25rem; }
+      .bmap-count { display: none; }
+      .bmap-nav button { width: 30px; height: 30px; }
+    }
+
+    /* Draw-in on first view: time sweeps left to right, roles pop in as it passes.
+       Default is the finished state; .bmap-pre holds it back. */
+    .bmap-sweep { transform-box: view-box; transform-origin: 0 0; }
+    .bmap-pre .bmap-sweep { transform: scaleX(0); }
+    .bmap-pre .bmap-commit,
+    .bmap-pre .bmap-main-name,
+    .bmap-pre .bmap-now,
+    .bmap-pre .bmap-year,
+    .bmap-pre .bmap-crew { opacity: 0; }
+    .bmap-pre .bmap-commit { transform: translate(-9px, -50%) scale(0.6); }
+
+    .bmap-drawing .bmap-sweep { transition: transform 1.9s linear; }
+    .bmap-drawing .bmap-commit {
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition-delay: var(--delay, 0s);
+    }
+    .bmap-drawing .bmap-main-name,
+    .bmap-drawing .bmap-now,
+    .bmap-drawing .bmap-year,
+    .bmap-drawing .bmap-crew {
+      transition: opacity 0.4s ease;
+      transition-delay: var(--delay, 0s);
+    }
+
+    .is-reduced .bmap-panel { animation: none; }
+
+    /* ========================================
+       Prototype-only chrome
+       ======================================== */
+
+    .proto-bar {
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      z-index: 200;
+      width: min(280px, calc(100vw - 24px));
+      padding: 0.85rem 0.95rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-secondary);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+    }
+
+    .proto-bar summary { cursor: pointer; color: var(--color-text); font-weight: 600; }
+    .proto-bar .row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.7rem; align-items: center; }
+    .proto-bar button {
+      padding: 0.25rem 0.6rem;
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+    }
+    .proto-bar button[aria-pressed="true"] { border-color: var(--color-accent); color: var(--color-accent); }
+    .proto-top { padding-top: 2rem; }
+  </style>
+</head>
+<body>
+  <main class="proto-top">
+    <section class="site-container section" id="experience" aria-labelledby="experience-heading">
+      <div class="section-label-col">
+        <div class="section-label">
+          <span class="section-label-path"><span class="section-label-tilde">~/</span>experience</span>
+          <span class="section-label-rule" aria-hidden="true"></span>
+        </div>
+      </div>
+      <div class="section-content">
+        <h2 id="experience-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Experience</h2>
+        <div class="bmap-scroll" id="bmap-scroll">
+          <div class="bmap bmap-pre" id="bmap" role="tablist" aria-label="Career history"></div>
+        </div>
+        <div class="bmap-legend" aria-hidden="true">
+          <span><i class="lg-work"></i>work</span>
+          <span><i class="lg-campus"></i>campus</span>
+          <span><i class="lg-open"></i>ongoing</span>
+          <span><i class="lg-school"></i>school</span>
+          <span><i class="lg-tag"></i>degree</span>
+        </div>
+        <div class="bmap-card">
+          <div class="bmap-card-top">
+            <p class="bmap-ref" id="bmap-ref"></p>
+            <div class="bmap-nav">
+              <button type="button" id="bmap-prev" aria-label="Older role">←</button>
+              <span class="bmap-count" id="bmap-count"></span>
+              <button type="button" id="bmap-next" aria-label="Newer role">→</button>
+            </div>
+          </div>
+          <div class="bmap-panels" id="bmap-panels"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <details class="proto-bar" open>
+    <summary>branch-map · dev</summary>
+    <div class="row" id="crew-picks">crew:</div>
+    <div class="row">
+      <button type="button" id="replay">Replay draw</button>
+      <button type="button" id="theme">Toggle theme</button>
+      <button type="button" id="motion">Reduced motion</button>
+    </div>
+  </details>
+
+  <script>
+    // Port target: src/content.ts gains `track`, `lane`, `start`/`end` ("YYYY-MM", end null = present)
+    // and a short map `label` per entry. Listed in the order they appear on the map (left → right).
+    // Lanes: negative = above main (campus), positive = below (work); 1 is nearest main.
+    const commits = [
+      { track: "work", lane: 1, start: "2022-06", end: "2025-08", label: "24 Hour Fitness", role: "Sales and Service Expert", company: "24 Hour Fitness", date: "Jun 2022 — Aug 2025",
+        summary: "Led a team of 10 while providing daily support to 800+ members, consistently exceeding 130% of monthly revenue goals.",
+        tags: ["Sales", "Customer Service", "Team Collaboration"] },
+      { track: "occ", tag: true, school: "OCC", at: "2024-05", label: "Orange Coast College", role: "Orange Coast College", company: "Costa Mesa, CA", companyUrl: "https://orangecoastcollege.edu/", date: "2022 — May 2024",
+        edu: "Finished with a 4.0 GPA and a place on the President's List, then transferred to CSUF for the B.S. in Computer Science.",
+        tags: [] },
+      { track: "campus", lane: -3, start: "2025-05", end: "2026-05", label: "ACM", role: "Artificial Intelligence Officer", company: "ACM", companyUrl: "https://acmcsuf.com", date: "May 2025 — May 2026",
+        summary: "Served as a board member for the AI Team, conducting Data Science and ML workshops for 35+ students covering feature engineering, model training, and evaluation. Increased workshop attendance by 50% by developing real-world programming demo applications.",
+        tags: ["Technical Communication", "Project Planning", "AI/ML"] },
+      { track: "campus", lane: -1, start: "2025-06", end: "2025-09", label: "Day of AI", role: "AI Instructor", company: "MIT's Day of AI — NextEdu Lab", companyUrl: "https://dayofai.org", date: "Jun 2025 — Sep 2025",
+        summary: "Taught MIT AI concepts using Scratch, DALL·E, and ChatGPT, guiding students through hands-on activities and prompt-based AI interactions in a collaborative learning environment.",
+        tags: ["Artificial Intelligence", "Machine Learning", "Teaching"] },
+      { track: "campus", lane: -2, start: "2025-07", end: "2026-05", label: "Project RAISE", role: "Peer Advisor", company: "Project RAISE", companyUrl: "https://www.fullerton.edu/projectraise/", date: "Jul 2025 — May 2026",
+        summary: "Mentored 40+ STEM transfer students through 1-on-1 advising, technical guidance, and academic planning. Delivered technical presentations and workshops to 100+ students on software engineering and career development.",
+        tags: ["Mentoring", "Leadership", "STEM Education"] },
+      { track: "work", lane: 2, start: "2025-09", end: "2026-01", label: "Yembo", role: "Software Engineer Intern", company: "Yembo", companyUrl: "https://www.emit-light.com/lightwall", date: "Sep 2025 — Jan 2026",
+        summary: "Rebuilt a multi-threaded Python system orchestrating 16 microcontrollers for real-time AI interaction, and engineered a speech recognition pipeline using whisper.cpp achieving 2–4s response latency. Deployed a production AI installation serving continuous live interaction during a multi-month museum exhibition.",
+        tags: ["Python", "Embedded Systems", "Speech Recognition", "AI/ML", "whisper.cpp"] },
+      { track: "work", lane: 1, start: "2025-10", end: "2026-05", label: "Crete Robotics", role: "Software Engineer Intern", company: "Crete Robotics Solutions", companyUrl: "https://www.cretebot.ai/", date: "Oct 2025 — May 2026",
+        summary: "Designed a RESTful API with 30+ endpoints supporting task matching and messaging. Implemented real-time WebSocket messaging with JWT authentication and MongoDB persistence. Established pytest unit tests maintaining 80% code coverage across all API endpoints.",
+        tags: ["Python", "FastAPI", "MongoDB", "REST APIs", "WebSockets", "Pytest"] },
+      { track: "campus", lane: -1, start: "2025-11", end: "2026-05", label: "CSUF Research", role: "Research Assistant", company: "Dr. Anand Panangadan — CSUF", companyUrl: "https://www.fullerton.edu/ecs/faculty/apanangadan/", date: "Nov 2025 — May 2026",
+        summary: "Contributed to a real-time smart cooking assistant for low-income supportive housing — a multi-semester research project deploying a fine-tuned YOLOv11s model on a Raspberry Pi 5 with an AI HAT+ NPU for edge-based cooking state detection. The system uses a custom dataset of 1,300+ labeled images, temporal majority-vote stabilization, and async API integration to guide residents step-by-step through recipes via computer vision.",
+        tags: ["Python", "Raspberry Pi", "Computer Vision", "AI/ML", "Embedded Systems", "Thermal Imaging"] },
+      { track: "school", tag: true, school: "CSUF", at: "2026-05", label: "B.S. Computer Science", role: "B.S. Computer Science", company: "California State University, Fullerton", date: "May 2026",
+        edu: "Graduated with a 3.98 GPA. Research, advising, ACM and the Crete internship all merge back here, the same month. From here main is the career.",
+        tags: [] },
+      // First on main right after the degree, then splits off when Internet Brands takes main
+      { track: "work", lane: 1, start: "2026-05", splitAt: "2026-08", end: null, label: "Mindful Metrics", role: "Software Engineer", company: "Mindful Metrics", companyUrl: "https://mindfulmetrics.cc/", date: "May 2026 — Present",
+        summary: "Integrated Google GenAI SDK into a DTF marketplace to power intelligent technician-job matching. Refactored an e-commerce platform to FastAPI/React with Stripe and Shopify integration, supporting 1M+ items sold. Launched a logistics platform integrating CRM and ERP APIs with i18n support across English and Chinese.",
+        tags: ["Python", "FastAPI", "React.js", "Google GenAI", "Stripe", "REST APIs", "i18n"] },
+      { track: "work", onMain: true, start: "2026-08", end: null, head: true, label: "Internet Brands", role: "Associate AI Software Engineer", company: "Internet Brands", companyUrl: "https://www.internetbrands.com/", date: "Aug 2026 — Present",
+        summary: "Building agentic AI workflows and full-stack features across Internet Brands' product platform, from API design to CI/CD-driven deployment.",
+        tags: ["Agile Methodologies", "Agentic Workflows", "CI/CD", "Docker", "PostgreSQL"] },
+    ];
+
+    // Sprites from src/scripts/hero-build.ts ('.' empty, k ink, a accent, s sand, w paper)
+    const LIFEGUARD = [[
+      "...kkkk....", "..kkkkkk...", "..ssssss...", "..skssks...", "..ssssss...", "...ssss....",
+      "..aaaaaa...", ".s.aaaa.s..", ".s.aaaa.aaa", "...s..s.aaa", "...s..s....", "..kk..kk...",
+    ], [
+      "...kkkk....", "..kkkkkk...", "..ssssss...", "..skssks...", "..ssssss...", "...ssss....",
+      "..aaaaaa...", ".s.aaaa.s..", ".s.aaaa.aaa", "...s.s..aaa", "..s...s....", ".kk...kk...",
+    ]];
+    const GULL = [[
+      "kk.......kk.", ".kkk...kkk..", "...kwwwwk.ww", "....wwwwwwkw", ".....wwwwwaa", "......a..a..",
+    ], [
+      "............", "............", "kkkkwwwwkkww", "....wwwwwwkw", ".....wwwwwaa", "......a..a..",
+    ]];
+    const CREWS = { lifeguard: { frames: LIFEGUARD, fly: false }, gull: { frames: GULL, fly: true } };
+    const PX = 2;
+
+    const root = document.documentElement;
+    const map = document.getElementById("bmap");
+    const scroller = document.getElementById("bmap-scroll");
+    const panels = document.getElementById("bmap-panels");
+    const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const reduced = () => root.classList.contains("force-reduced") || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const q = new URLSearchParams(location.search);
+
+    let crewName = q.get("crew") || "lifeguard";
+    let selected = commits.findIndex((c) => c.head);
+    let geo = null; // dot centres in map pixels
+    let crew = null;
+
+    // ---------- Time ----------
+
+    const monthIndex = (s) => { const [y, m] = s.split("-").map(Number); return y * 12 + m - 1; };
+    const today = new Date();
+    const NOW = today.getFullYear() * 12 + today.getMonth();
+    const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+    function tenure(c) {
+      const n = (c.end ? monthIndex(c.end) : NOW) - monthIndex(c.start) + 1;
+      const y = Math.floor(n / 12), m = n % 12;
+      if (!y) return `${n} mo`;
+      return m ? `${y} yr ${m} mo` : `${y} yr`;
+    }
+
+    // ---------- Panels (port: server-rendered by Astro, one per role) ----------
+
+    function panelHTML(c, i) {
+      const company = c.companyUrl
+        ? `<a href="${c.companyUrl}" target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">${esc(c.company)}</a>`
+        : `<span class="exp-company">${esc(c.company)}</span>`;
+      const body = c.edu ? `<p class="bmap-edu">${esc(c.edu)}</p>` : `<p class="exp-summary">${esc(c.summary)}</p>`;
+      return `
+        <div class="bmap-panel" role="tabpanel" id="bmap-panel-${i}" aria-labelledby="bmap-tab-${i}">
+          <div class="exp-header"><h3 class="exp-role">${esc(c.role)}</h3><div class="exp-meta">${company}</div></div>
+          ${body}
+          ${c.tags.length ? `<div class="chip-row">${c.tags.map((t) => `<span class="chip">${esc(t)}</span>`).join("")}</div>` : ""}
+        </div>`;
+    }
+
+    panels.innerHTML = commits.map(panelHTML).join("");
+
+    // ---------- Map geometry ----------
+
+    const LANE = 34;
+    const MAIN_Y = 46 + 3 * LANE;       // room above for three campus lanes plus the crew
+    const H = MAIN_Y + 2 * LANE + 52;   // two work lanes below, then the year ticks
+    const T0 = monthIndex("2022-06");   // first role
+    const T_DENSE = monthIndex("2025-01"); // months before this are drawn narrower, but still continuous
+    const EARLY = 0.16;                    // width of an early month relative to a 2025+ month
+    const T_TRANSFER = monthIndex("2024-06"); // OCC → CSUF
+    const X0 = 22, PAD_R = 128; // right pad fits the "Internet Brands HEAD" label past now
+
+    function layout() {
+      const phone = matchMedia("(max-width: 768px)").matches;
+      const avail = scroller.clientWidth - 8;
+      const units = (T_DENSE - T0) * EARLY + (NOW + 1 - T_DENSE);
+      const mpx = Math.max(phone ? 26 : 22, (avail - X0 - PAD_R) / units);
+      const X = (m) => m <= T_DENSE
+        ? X0 + (m - T0) * EARLY * mpx
+        : X0 + (T_DENSE - T0) * EARLY * mpx + (m - T_DENSE) * mpx;
+      const xNow = X(NOW + 1);
+      const laneY = (l) => MAIN_Y + l * LANE;
+
+      const xGrad = X(monthIndex(commits.find((c) => c.school === "CSUF").at) + 1);
+      const nodes = commits.map((c) => {
+        if (c.tag) return { x: X(monthIndex(c.at) + 1), y: MAIN_Y };
+        if (c.onMain) {
+          const xs = X(monthIndex(c.start));
+          return { x: xs + 17, y: MAIN_Y, xs, xe: xNow };
+        }
+        const cw = 12 + 5 * Math.abs(c.lane); // farther lanes get a gentler curve
+        // A role that starts on main only forks off when it hands main over (splitAt)
+        const xs = X(monthIndex(c.splitAt || c.start));
+        const xe = c.end ? X(monthIndex(c.end) + 1) : xNow;
+        const y = laneY(c.lane);
+        return { x: xs + cw, y, xs, xe, cw, mainFrom: c.splitAt ? xGrad : null };
+      });
+      return { phone, W: Math.ceil(xNow + PAD_R), X, xNow, xGrad, nodes };
+    }
+
+    function branchPaths(c, n) {
+      const { xs, xe, cw, y, mainFrom } = n;
+      if (c.onMain) return { d: `M${xs} ${MAIN_Y} H${xe}`, tail: `M${xe} ${MAIN_Y} H${xe + 22}` };
+      const fork = `M${mainFrom ?? xs} ${MAIN_Y} H${xs} C${xs + cw * 0.6} ${MAIN_Y} ${xs + cw * 0.4} ${y} ${xs + cw} ${y}`;
+      const run = c.end
+        ? ` H${xe - cw} C${xe - cw * 0.4} ${y} ${xe - cw * 0.6} ${MAIN_Y} ${xe} ${MAIN_Y}`
+        : ` H${xe}`;
+      return { d: fork + run, tail: c.end ? null : `M${xe} ${y} H${xe + 22}` };
+    }
+
+    function draw() {
+      geo = layout();
+      const { W, X, xNow, xGrad, nodes } = geo;
+      const xTransfer = X(T_TRANSFER);
+      const sweepDur = 1.9;
+
+      map.style.width = W + "px";
+      map.style.setProperty("--h", H + "px");
+
+      const branches = commits.map((c, i) => {
+        if (c.tag) return "";
+        const { d, tail } = branchPaths(c, nodes[i]);
+        const cls = `bmap-line is-${c.track}`;
+        const trunk = c.onMain || c.splitAt ? " is-trunk" : "";
+        return `<g class="bmap-branch${trunk}" data-i="${i}">
+          <path class="${cls}" d="${d}"/>
+          ${tail ? `<path class="${cls} is-tail" d="${tail}"/>` : ""}
+          <path class="bmap-hit" data-i="${i}" d="${d}"/>
+        </g>`;
+      }).join("");
+
+      // A tick for every year, so the narrower early years still read as continuous time
+      const ticks = [2023, 2024, 2025, 2026].map((y) => [String(y), X(y * 12)]);
+      const delay = (x) => ((x / W) * sweepDur - 0.1).toFixed(2);
+
+      map.innerHTML = `
+        <svg class="bmap-lines" width="${W}" height="${H}" aria-hidden="true">
+          <defs><clipPath id="bmap-clip"><rect class="bmap-sweep" x="0" y="0" width="${W}" height="${H}"/></clipPath></defs>
+          <g clip-path="url(#bmap-clip)">
+            ${branches}
+            <path class="bmap-line is-occ" d="M4 ${MAIN_Y} H${xTransfer}"/>
+            <path class="bmap-line is-school" d="M${xTransfer} ${MAIN_Y} H${xGrad}"/>
+            <path class="bmap-line is-school-stripe" d="M${xTransfer} ${MAIN_Y} H${xGrad}"/>
+          </g>
+        </svg>
+        <span class="bmap-main-name is-occ" style="left:2px;top:${MAIN_Y}px;--delay:0s">occ</span>
+        <span class="bmap-main-name" style="left:${xTransfer + 6}px;top:${MAIN_Y}px;--delay:${delay(xTransfer)}s">csuf</span>
+        <span class="bmap-now" style="left:${xNow}px;--delay:${delay(xNow)}s"></span>
+        ${ticks.map(([yr, x]) => `<span class="bmap-year" style="left:${x}px;--delay:${delay(x)}s">${yr}</span>`).join("")}
+        <span class="bmap-year is-now" style="left:${xNow}px;--delay:${delay(xNow)}s">now</span>
+        ${commits.map((c, i) => `
+          <button type="button" role="tab" id="bmap-tab-${i}" aria-controls="bmap-panel-${i}"
+            class="bmap-commit on-${c.track}${c.tag ? " is-tag" : ""}"
+            style="left:${nodes[i].x}px;top:${nodes[i].y}px;--delay:${delay(nodes[i].x)}s">
+            <span class="bmap-dot" aria-hidden="true"></span>
+            <span class="bmap-label${c.tag ? " sr-only" : ""}">${esc(c.label)}<span class="sr-only">, ${esc(c.date)}</span>${c.head ? `<span class="bmap-head" aria-hidden="true">HEAD</span>` : ""}</span>
+          </button>`).join("")}`;
+
+      map.querySelectorAll(".bmap-commit").forEach((b, i) => {
+        b.addEventListener("click", () => select(i, true));
+        b.addEventListener("keydown", onKey);
+      });
+
+      // Clicking or hovering anywhere on a branch line works like its button
+      map.querySelectorAll(".bmap-hit").forEach((h) => {
+        const i = +h.dataset.i;
+        const g = h.parentNode;
+        h.addEventListener("click", () => select(i, true));
+        h.addEventListener("pointerenter", () => g.classList.add("is-hover"));
+        h.addEventListener("pointerleave", () => g.classList.remove("is-hover"));
+      });
+
+      buildCrew();
+      select(selected, false, true);
+    }
+
+    // ---------- Selection ----------
+
+    function select(i, fromUser, instant) {
+      i = Math.max(0, Math.min(commits.length - 1, i));
+      selected = i;
+      const c = commits[i];
+      map.querySelectorAll(".bmap-commit").forEach((b, k) => {
+        b.setAttribute("aria-selected", k === i);
+        b.tabIndex = k === i ? 0 : -1;
+      });
+      map.classList.toggle("has-focus", !c.tag);
+      map.querySelectorAll(".bmap-branch").forEach((g) => g.classList.toggle("is-active", +g.dataset.i === i));
+      panels.querySelectorAll(".bmap-panel").forEach((p, k) => {
+        p.setAttribute("aria-hidden", k !== i);
+        p.inert = k !== i;
+      });
+
+      const ref = document.getElementById("bmap-ref");
+      ref.className = `bmap-ref on-${c.track}`;
+      const branch = c.tag ? `degree · ${c.school}`
+        : c.onMain ? "main"
+        : c.splitAt ? `main → ${c.track}/${slug(c.label)}`
+        : `${c.track}/${slug(c.label)}`;
+      ref.innerHTML = `<span class="bmap-ref-dot"></span><span class="bmap-ref-branch">${esc(branch)}</span>`
+        + `<span class="bmap-ref-when">· ${esc(c.date)}${c.tag ? "" : ` · ${tenure(c)}`}</span>`;
+      document.getElementById("bmap-count").textContent = `${i + 1} / ${commits.length}`;
+      document.getElementById("bmap-prev").disabled = i === 0;
+      document.getElementById("bmap-next").disabled = i === commits.length - 1;
+
+      // Keep the selected role in view on phones
+      if (geo.phone && fromUser) {
+        scroller.scrollTo({ left: geo.nodes[i].x - scroller.clientWidth / 3, behavior: reduced() ? "auto" : "smooth" });
+      }
+      moveCrew(i, instant || !fromUser);
+    }
+
+    function onKey(e) {
+      const k = { ArrowRight: 1, ArrowLeft: -1, Home: -Infinity, End: Infinity }[e.key];
+      if (k === undefined) return;
+      e.preventDefault();
+      const i = k === -Infinity ? 0 : k === Infinity ? commits.length - 1 : selected + k;
+      select(i, true);
+      document.getElementById(`bmap-tab-${selected}`).focus();
+    }
+
+    document.getElementById("bmap-prev").onclick = () => select(selected - 1, true);
+    document.getElementById("bmap-next").onclick = () => select(selected + 1, true);
+
+    // ---------- Crew ----------
+
+    function spriteSVG(rows) {
+      const h = rows.length, w = Math.max(...rows.map((r) => r.length));
+      const at = (cx, cy) => (cy < 0 || cy >= h || cx < 0 || cx >= w ? "." : rows[cy][cx] || ".");
+      let out = "";
+      // 1px ink outline, same rule as hero-build.ts drawSprite
+      for (let cy = -1; cy <= h; cy++) for (let cx = -1; cx <= w; cx++) {
+        if (at(cx, cy) !== ".") continue;
+        if (at(cx + 1, cy) !== "." || at(cx - 1, cy) !== "." || at(cx, cy + 1) !== "." || at(cx, cy - 1) !== ".")
+          out += `<rect class="px-k" x="${cx + 1}" y="${cy + 1}" width="1" height="1"/>`;
+      }
+      for (let cy = 0; cy < h; cy++) for (let cx = 0; cx < w; cx++) {
+        const ch = at(cx, cy);
+        if (ch !== ".") out += `<rect class="px-${ch}" x="${cx + 1}" y="${cy + 1}" width="1" height="1"/>`;
+      }
+      return { svg: `<svg width="${(w + 2) * PX}" height="${(h + 2) * PX}" viewBox="0 0 ${w + 2} ${h + 2}">${out}</svg>`, w: (w + 2) * PX, h: (h + 2) * PX };
+    }
+
+    function buildCrew() {
+      crew?.el.remove();
+      crew = null;
+      if (crewName === "off") return;
+      const def = CREWS[crewName];
+      const el = document.createElement("div");
+      el.className = "bmap-crew";
+      el.style.setProperty("--delay", "2s");
+      const frames = def.frames.map(spriteSVG);
+      el.innerHTML = frames.map((f, k) => `<div data-f="${k}"${k ? " hidden" : ""}>${f.svg}</div>`).join("");
+      map.appendChild(el);
+      crew = { el, def, w: frames[0].w, h: frames[0].h, x: 0, y: 0, dir: 1, anim: 0 };
+    }
+
+    // Stand on the role's dot, nudged left so the label stays readable (the gull hovers a little higher)
+    function perch(i) {
+      return { x: geo.nodes[i].x - 5, y: geo.nodes[i].y - 9 - (crew.def.fly ? 10 : 0) };
+    }
+
+    function place(x, y, dir, frame) {
+      crew.x = x; crew.y = y; crew.dir = dir;
+      crew.el.style.transform = `translate(${Math.round(x - crew.w / 2)}px, ${Math.round(y - crew.h)}px) scaleX(${dir})`;
+      crew.el.querySelectorAll("[data-f]").forEach((f) => (f.hidden = +f.dataset.f !== frame));
+    }
+
+    function moveCrew(i, instant) {
+      if (!crew) return;
+      cancelAnimationFrame(crew.anim);
+      const to = perch(i);
+      const from = { x: crew.x, y: crew.y };
+      const dist = Math.hypot(to.x - from.x, to.y - from.y);
+      const dir = to.x === from.x ? crew.dir : to.x > from.x ? 1 : -1;
+      if (instant || reduced() || dist < 1) { place(to.x, to.y, dir, 0); return; }
+      const dur = Math.min(950, Math.max(320, dist * 1.4));
+      const lift = crew.def.fly ? Math.min(46, 18 + dist * 0.08) : Math.min(26, 10 + dist * 0.05);
+      const t0 = performance.now();
+      const step = (now) => {
+        const t = Math.min(1, (now - t0) / dur);
+        const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const x = from.x + (to.x - from.x) * e;
+        const y = from.y + (to.y - from.y) * e - Math.sin(Math.PI * t) * lift;
+        const frame = t < 1 ? Math.floor(now / (crew.def.fly ? 110 : 130)) % 2 : 0;
+        place(x, y, dir, frame);
+        if (t < 1) crew.anim = requestAnimationFrame(step);
+      };
+      crew.anim = requestAnimationFrame(step);
+    }
+
+    // ---------- Draw-in ----------
+
+    let io;
+    function playIn() {
+      io?.disconnect();
+      map.classList.remove("bmap-drawing");
+      if (reduced()) { map.classList.remove("bmap-pre"); root.classList.add("is-reduced"); return; }
+      root.classList.remove("is-reduced");
+      map.classList.add("bmap-pre");
+      io = new IntersectionObserver(([en]) => {
+        if (!en.isIntersecting) return;
+        io.disconnect();
+        map.getBoundingClientRect();
+        map.classList.add("bmap-drawing");
+        requestAnimationFrame(() => requestAnimationFrame(() => map.classList.remove("bmap-pre")));
+      }, { threshold: 0.35 });
+      io.observe(map);
+    }
+
+    function boot() {
+      draw();
+      if (geo.phone) scroller.scrollLeft = scroller.scrollWidth;
+      playIn();
+    }
+
+    // Rebuild on width changes; keep the selection and skip the draw-in
+    let lastW = 0;
+    new ResizeObserver(() => {
+      const w = scroller.clientWidth;
+      if (!lastW) { lastW = w; return; }
+      if (w === lastW || !geo) return;
+      lastW = w;
+      const pending = map.classList.contains("bmap-pre");
+      draw();
+      if (!pending) map.classList.remove("bmap-pre");
+    }).observe(scroller);
+
+    // ---------- Dev panel ----------
+
+    const picks = document.getElementById("crew-picks");
+    ["off", "lifeguard", "gull"].forEach((name) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = name;
+      b.setAttribute("aria-pressed", name === crewName);
+      b.onclick = () => {
+        crewName = name;
+        picks.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+        buildCrew();
+        if (crew) moveCrew(selected, true);
+      };
+      picks.appendChild(b);
+    });
+    document.getElementById("replay").onclick = () => { draw(); playIn(); };
+    document.getElementById("theme").onclick = () => {
+      root.setAttribute("data-theme", root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+    };
+    const motionBtn = document.getElementById("motion");
+    motionBtn.setAttribute("aria-pressed", reduced());
+    motionBtn.onclick = () => {
+      root.classList.toggle("force-reduced");
+      motionBtn.setAttribute("aria-pressed", reduced());
+      draw();
+      playIn();
+    };
+    if (q.get("panel") === "closed") document.querySelector(".proto-bar").open = false;
+
+    document.fonts.ready.then(boot);
+  </script>
+</body>
+</html>

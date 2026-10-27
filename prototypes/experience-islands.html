@@ -1,0 +1,1515 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Experience Islands · prototype</title>
+
+  <!-- Same fonts as src/layouts/Base.astro -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- The site's real stylesheets, so tokens and experience styles stay in sync -->
+  <link rel="stylesheet" href="../src/styles/global.css" />
+  <link rel="stylesheet" href="../src/styles/layout.css" />
+  <link rel="stylesheet" href="../src/styles/components.css" />
+
+  <!-- Theme script from Base.astro. ?theme=, ?motion=reduce, ?panel=closed, ?at=<id>, ?sail=<id> override for review. -->
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var q = new URLSearchParams(location.search);
+      try {
+        var stored = q.get("theme") || localStorage.getItem("theme");
+        if (stored) root.setAttribute("data-theme", stored);
+        else if (window.matchMedia("(prefers-color-scheme: dark)").matches) root.setAttribute("data-theme", "dark");
+      } catch (e) {}
+      if (q.get("motion") === "reduce") root.classList.add("force-reduced");
+    })();
+  </script>
+
+  <style>
+    /* ========================================
+       Experience islands (port target: components.css)
+       Without JS the log below renders as a plain list of roles.
+       ======================================== */
+
+    .isea {
+      position: relative;
+    }
+
+    .isea-on .isea {
+      height: var(--h, 1600px);
+    }
+
+    /* Water, land and marks reach --bleed px into the left margin, so the coast can be wider */
+    .isea-layer {
+      position: absolute;
+      top: 0;
+      left: calc(-1 * var(--bleed, 0px));
+      width: calc(100% + var(--bleed, 0px));
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .isea-land { fill: var(--color-sand); opacity: 0.55; }
+    .isea-foam { fill: var(--color-paper); }
+    [data-theme="dark"] .isea-land { opacity: 0.22; }
+    [data-theme="dark"] .isea-foam { opacity: 0.35; }
+
+    /* Years along the shore: each washes up as it scrolls into view and back out once it leaves */
+    .isea-yearline { fill: var(--color-text-secondary); opacity: 0.3; }
+    .isea-year {
+      position: absolute;
+      z-index: 1;
+      translate: -100% 0;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: var(--color-text-secondary);
+      pointer-events: none;
+      opacity: 0;
+    }
+    .isea-year::after {
+      content: "";
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      height: 2px;
+      margin-top: -1px;
+      background: var(--color-paper);
+      opacity: 0;
+    }
+    .isea-year.is-ashore { animation: year-wash 0.9s steps(9, end) forwards; }
+    .isea-year.is-ashore::after { animation: year-foam 0.9s steps(9, end) forwards; }
+    @keyframes year-wash {
+      0% { opacity: 0; transform: translateX(28px); }
+      30% { opacity: 1; }
+      70% { transform: translateX(-2px); }
+      100% { opacity: 1; transform: none; }
+    }
+    @keyframes year-foam {
+      0% { width: 28px; opacity: 0; }
+      25% { opacity: 0.9; }
+      70% { width: 6px; opacity: 0.6; }
+      100% { width: 0; opacity: 0; }
+    }
+    .is-reduced .isea-year.is-ashore { opacity: 1; animation: none; }
+    .is-reduced .isea-year::after { animation: none; }
+
+    /* Tenure bracket for the selected stop */
+    .isea-span line { stroke: var(--color-accent); stroke-width: 2; }
+    .isea-span .is-open { stroke-dasharray: 2 4; }
+
+    .isea-leader { stroke: var(--color-accent); stroke-width: 1; stroke-dasharray: 3 4; fill: none; opacity: 0.7; }
+
+    /* Sprite palette, same as the hero crew */
+    .isea .px-k { fill: var(--color-text); }
+    .isea .px-a { fill: var(--color-accent); }
+    .isea .px-s { fill: var(--color-sand); }
+
+    /* Island colours: muted and warm so terracotta stays the accent. Local to the sea, not site tokens. */
+    .isea {
+      --isle-grass: #9DB383;
+      --isle-leaf: #6C8757;
+      --isle-wood: #B07E52;
+      --isle-mat: #4E4A46;
+      --isle-glow: #E8B649;
+      --isle-screen: #7FA3BF;
+      --isle-board: #3F5848;
+      --isle-stone: #B9B2A6;
+      --isle-stone-edge: #8F877B;
+    }
+    [data-theme="dark"] .isea {
+      --isle-grass: #7F9668;
+      --isle-leaf: #8BA674;
+      --isle-wood: #9C7049;
+      --isle-mat: #57524D;
+      --isle-glow: #D9A63E;
+      --isle-screen: #7096B3;
+      --isle-board: #4A6655;
+      --isle-stone: #7A7268;
+      --isle-stone-edge: #504A44;
+    }
+    .isea-stone { fill: var(--isle-stone); }
+    .isea-stone-edge { fill: var(--isle-stone-edge); }
+    .isea .px-g { fill: var(--isle-grass); }
+    .isea .px-l { fill: var(--isle-leaf); }
+    .isea .px-t { fill: var(--isle-wood); }
+    .isea .px-m { fill: var(--isle-mat); }
+    .isea .px-y { fill: var(--isle-glow); }
+    .isea .px-u { fill: var(--isle-screen); }
+    .isea .px-c { fill: var(--isle-board); }
+    .isea .px-w { fill: var(--color-paper); }
+    /* Dark: the ink outline turns light (as in the hero), so paper steps down to a warm grey to stay distinct */
+    [data-theme="dark"] .isea .px-w { fill: #857A70; }
+    .isea svg { shape-rendering: crispEdges; }
+
+    /* Islands and coast landmarks: real buttons */
+    .isle {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.1rem;
+      padding: 0.25rem 0.35rem 0.3rem;
+      border-radius: var(--radius-sm);
+      transform: translateX(-50%);
+      color: var(--color-text);
+      text-align: center;
+      line-height: 1.25;
+      z-index: 2;
+    }
+
+    .isle-art { display: grid; transition: transform 0.2s ease; }
+    .isle-art > svg { grid-area: 1 / 1; }
+
+    /* Current roles: the flag flutters between two frames */
+    .isle-flag-0, .isle-flag-1 { animation: isle-flutter 1.1s steps(1, end) infinite; }
+    .isle-flag-1 { animation-delay: -0.55s; }
+    @keyframes isle-flutter { 50%, 100% { visibility: hidden; } }
+    .is-reduced .isle-flag-0 { animation: none; }
+    .is-reduced .isle-flag-1 { display: none; }
+
+    /* The lighthouse light sweeps across the water and back over the land */
+    .isle-beam {
+      position: absolute;
+      left: 50%;
+      width: 78px;
+      height: 22px;
+      margin-top: -11px;
+      background: linear-gradient(to right, var(--color-accent), transparent);
+      opacity: 0.3;
+      clip-path: polygon(0 44%, 100% 0, 100% 100%, 0 56%);
+      transform-origin: 0 50%;
+      animation: isle-sweep 7s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes isle-sweep {
+      0%, 100% { transform: scaleX(1); }
+      25%, 75% { transform: scaleX(0.05); }
+      50% { transform: scaleX(-1); }
+    }
+    .is-reduced .isle-beam { animation: none; }
+    .isle:hover .isle-art { transform: translateY(-2px); }
+
+    .isle-name {
+      font-family: var(--font-heading);
+      font-size: 0.86rem;
+      font-weight: 600;
+      white-space: nowrap;
+      margin-top: 0.15rem;
+    }
+
+    .isle-when {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+    }
+
+    .isle.is-active .isle-name { color: var(--color-accent); }
+    .isle:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+    .isle.is-coast .isle-when { color: var(--color-text); margin-top: 0.15rem; }
+
+    /* The boat */
+    .isea-boat {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 3;
+      pointer-events: none;
+      will-change: transform;
+    }
+    .isea-boat-bob { animation: isea-bob 1.6s steps(2, jump-none) infinite; }
+    @keyframes isea-bob { 50% { transform: translateY(2px); } }
+    .is-reduced .isea-boat-bob { animation: none; }
+
+    /* The lifeguard on foot, between the boat and the lighthouse door */
+    .isea-walker {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 3;
+      transform-origin: 50% 100%;
+      pointer-events: none;
+    }
+    /* He's in: the lamp flares for a moment */
+    .isle-beam { transition: opacity 0.3s ease; }
+    .isle.is-lit .isle-beam { opacity: 0.7; }
+
+    /* Log: one card per stop. All of them are in the HTML; the map shows one at a time. */
+    .isle-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1.15rem 1.3rem 1.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .isle-ref {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 0.55rem;
+    }
+    .isle-ref b { color: var(--color-accent); font-weight: 500; }
+
+    .isle-date {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 0.75rem;
+    }
+
+    .isle-card .exp-summary { font-size: 0.9rem; }
+    .isle-card .chip { font-size: 0.7rem; }
+
+    .isea-on .isle-card {
+      position: absolute;
+      z-index: 4;
+      margin: 0;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Closed cards stay readable by screen readers and crawlers, just not drawn */
+    .isea-on .isle-card:not(.is-open) {
+      width: 1px !important;
+      height: 1px;
+      padding: 0;
+      border: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .isea-on .isle-card.is-open { animation: isle-card-in 0.28s ease both; }
+    @keyframes isle-card-in { from { opacity: 0; transform: translateY(6px); } }
+    .is-reduced .isle-card.is-open { animation: none; }
+
+    /* ========================================
+       Prototype-only chrome
+       ======================================== */
+
+    .proto-bar {
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      z-index: 200;
+      width: min(280px, calc(100vw - 24px));
+      padding: 0.85rem 0.95rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-secondary);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+    }
+
+    .proto-bar summary { cursor: pointer; color: var(--color-text); font-weight: 600; }
+    .proto-bar .row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.7rem; align-items: center; }
+    .proto-bar button {
+      padding: 0.25rem 0.6rem;
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+    }
+    .proto-bar button[aria-pressed="true"] { border-color: var(--color-accent); color: var(--color-accent); }
+    .proto-top { padding-top: 2rem; }
+  </style>
+</head>
+<body>
+  <main class="proto-top">
+    <section class="site-container section" id="experience" aria-labelledby="experience-heading">
+      <div class="section-label-col">
+        <div class="section-label">
+          <span class="section-label-path"><span class="section-label-tilde">~/</span>experience</span>
+          <span class="section-label-rule" aria-hidden="true"></span>
+        </div>
+      </div>
+      <div class="section-content">
+        <h2 id="experience-heading" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Experience</h2>
+
+        <!-- Port: server-rendered by Astro from content.ts, newest first.
+             data-start/end are "YYYY-MM" (no end = present), data-x is the island's spot across the sea (0 = shore, 1 = open water),
+             data-kind is work | campus | school. -->
+        <div class="isea" id="isea">
+          <div class="isea-log" id="isea-log">
+            <article class="isle-card" id="isle-internet-brands" data-label="Internet Brands" data-kind="work" data-start="2026-08" data-x="0.62" data-main>
+              <p class="isle-ref">~/experience/<b>internet-brands</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">Associate AI Software Engineer</h3>
+                <div class="exp-meta"><a href="https://www.internetbrands.com/" target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">Internet Brands</a></div>
+              </div>
+              <p class="isle-date">Aug 2026 — Present<span data-tenure></span></p>
+              <p class="exp-summary">Building agentic AI workflows and full-stack features across Internet Brands' product platform, from API design to CI/CD-driven deployment.</p>
+              <div class="chip-row"><span class="chip">Agile Methodologies</span><span class="chip">Agentic Workflows</span><span class="chip">CI/CD</span><span class="chip">Docker</span><span class="chip">PostgreSQL</span></div>
+            </article>
+
+            <article class="isle-card" id="isle-mindful-metrics" data-label="Mindful Metrics" data-kind="work" data-start="2026-05" data-x="0.34">
+              <p class="isle-ref">~/experience/<b>mindful-metrics</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">Software Engineer</h3>
+                <div class="exp-meta"><a href="https://mindfulmetrics.cc/" target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">Mindful Metrics</a></div>
+              </div>
+              <p class="isle-date">May 2026 — Present<span data-tenure></span></p>
+              <p class="exp-summary">Integrated Google GenAI SDK into a DTF marketplace to power intelligent technician-job matching. Refactored an e-commerce platform to FastAPI/React with Stripe and Shopify integration, supporting 1M+ items sold. Launched a logistics platform integrating CRM and ERP APIs with i18n support across English and Chinese.</p>
+              <div class="chip-row"><span class="chip">Python</span><span class="chip">FastAPI</span><span class="chip">React.js</span><span class="chip">Google GenAI</span><span class="chip">Stripe</span><span class="chip">REST APIs</span><span class="chip">i18n</span></div>
+            </article>
+
+            <article class="isle-card" id="isle-csuf" data-label="CSUF" data-kind="school" data-landmark="lighthouse" data-start="2024-08" data-end="2026-05" data-when="May 2026">
+              <p class="isle-ref">~/education/<b>csuf</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">B.S. Computer Science</h3>
+                <div class="exp-meta"><a href="https://www.fullerton.edu/" target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">California State University, Fullerton</a></div>
+              </div>
+              <p class="isle-date">2024 — May 2026 · transfer</p>
+              <p class="exp-summary">Graduated May 2026 with a 3.98 GPA.</p>
+            </article>
+
+            <article class="isle-card" id="isle-csuf-research" data-label="CSUF Research" data-kind="campus" data-start="2025-11" data-end="2026-05" data-x="0.12">
+              <p class="isle-ref">~/experience/<b>csuf-research</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">Research Assistant</h3>
+                <div class="exp-meta"><a href="https://www.fullerton.edu/ecs/faculty/apanangadan/" target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">Dr. Anand Panangadan — CSUF</a></div>
+              </div>
+              <p class="isle-date">Nov 2025 — May 2026<span data-tenure></span></p>
+              <p class="exp-summary">Contributed to a real-time smart cooking assistant for low-income supportive housing — a multi-semester research project deploying a fine-tuned YOLOv11s model on a Raspberry Pi 5 with an AI HAT+ NPU for edge-based cooking state detection. The system uses a custom dataset of 1,300+ labeled images, temporal majority-vote stabilization, and async API integration to guide residents step-by-step through recipes via computer vision.</p>
+              <div class="chip-row"><span class="chip">Python</span><span class="chip">Raspberry Pi</span><span class="chip">Computer Vision</span><span class="chip">AI/ML</span><span class="chip">Embedded Systems</span><span class="chip">Thermal Imaging</span></div>
+            </article>
+
+            <article class="isle-card" id="isle-crete-robotics" data-label="Crete Robotics" data-kind="work" data-start="2025-10" data-end="2026-05" data-x="0.58">
+              <p class="isle-ref">~/experience/<b>crete-robotics</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">Software Engineer Intern</h3>
+                <div class="exp-meta"><a href="https://www.cretebot.ai/" target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">Crete Robotics Solutions</a></div>
+              </div>
+              <p class="isle-date">Oct 2025 — May 2026<span data-tenure></span></p>
+              <p class="exp-summary">Designed a RESTful API with 30+ endpoints supporting task matching and messaging. Implemented real-time WebSocket messaging with JWT authentication and MongoDB persistence. Established pytest unit tests maintaining 80% code coverage across all API endpoints.</p>
+              <div class="chip-row"><span class="chip">Python</span><span class="chip">FastAPI</span><span class="chip">MongoDB</span><span class="chip">REST APIs</span><span class="chip">WebSockets</span><span class="chip">Pytest</span></div>
+            </article>
+
+            <article class="isle-card" id="isle-yembo" data-label="Yembo" data-kind="work" data-start="2025-09" data-end="2026-01" data-x="0.9">
+              <p class="isle-ref">~/experience/<b>yembo</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">Software Engineer Intern</h3>
+                <div class="exp-meta"><a href="https://www.emit-light.com/lightwall" target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">Yembo</a></div>
+              </div>
+              <p class="isle-date">Sep 2025 — Jan 2026<span data-tenure></span></p>
+              <p class="exp-summary">Rebuilt a multi-threaded Python system orchestrating 16 microcontrollers for real-time AI interaction, and engineered a speech recognition pipeline using whisper.cpp achieving 2–4s response latency. Deployed a production AI installation serving continuous live interaction during a multi-month museum exhibition.</p>
+              <div class="chip-row"><span class="chip">Python</span><span class="chip">Embedded Systems</span><span class="chip">Speech Recognition</span><span class="chip">AI/ML</span><span class="chip">whisper.cpp</span></div>
+            </article>
+
+            <article class="isle-card" id="isle-project-raise" data-label="Project RAISE" data-kind="campus" data-start="2025-07" data-end="2026-05" data-x="0.3">
+              <p class="isle-ref">~/experience/<b>project-raise</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">Peer Advisor</h3>
+                <div class="exp-meta"><a href="https://www.fullerton.edu/projectraise/" target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">Project RAISE</a></div>
+              </div>
+              <p class="isle-date">Jul 2025 — May 2026<span data-tenure></span></p>
+              <p class="exp-summary">Mentored 40+ STEM transfer students through 1-on-1 advising, technical guidance, and academic planning. Delivered technical presentations and workshops to 100+ students on software engineering and career development.</p>
+              <div class="chip-row"><span class="chip">Mentoring</span><span class="chip">Leadership</span><span class="chip">STEM Education</span></div>
+            </article>
+
+            <article class="isle-card" id="isle-day-of-ai" data-label="Day of AI" data-kind="work" data-start="2025-06" data-end="2025-09" data-x="0.72">
+              <p class="isle-ref">~/experience/<b>day-of-ai</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">AI Instructor</h3>
+                <div class="exp-meta"><a href="https://dayofai.org" target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">MIT's Day of AI — NextEdu Lab</a></div>
+              </div>
+              <p class="isle-date">Jun 2025 — Sep 2025<span data-tenure></span></p>
+              <p class="exp-summary">Taught MIT AI concepts using Scratch, DALL·E, and ChatGPT, guiding students through hands-on activities and prompt-based AI interactions in a collaborative learning environment.</p>
+              <div class="chip-row"><span class="chip">Artificial Intelligence</span><span class="chip">Machine Learning</span><span class="chip">Teaching</span></div>
+            </article>
+
+            <article class="isle-card" id="isle-acm" data-label="ACM" data-kind="campus" data-start="2025-05" data-end="2026-05" data-x="0.1">
+              <p class="isle-ref">~/experience/<b>acm</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">Artificial Intelligence Officer</h3>
+                <div class="exp-meta"><a href="https://acmcsuf.com" target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">ACM</a></div>
+              </div>
+              <p class="isle-date">May 2025 — May 2026<span data-tenure></span></p>
+              <p class="exp-summary">Served as a board member for the AI Team, conducting Data Science and ML workshops for 35+ students covering feature engineering, model training, and evaluation. Increased workshop attendance by 50% by developing real-world programming demo applications.</p>
+              <div class="chip-row"><span class="chip">Technical Communication</span><span class="chip">Project Planning</span><span class="chip">AI/ML</span></div>
+            </article>
+
+            <article class="isle-card" id="isle-occ" data-label="OCC" data-kind="school" data-landmark="harbor" data-start="2022-06" data-end="2024-05" data-when="May 2024">
+              <p class="isle-ref">~/education/<b>occ</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">Orange Coast College</h3>
+                <div class="exp-meta"><a href="https://orangecoastcollege.edu/" target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">Costa Mesa, CA</a></div>
+              </div>
+              <p class="isle-date">2022 — May 2024</p>
+              <p class="exp-summary">4.0 GPA, President's List. Transferred to Cal State Fullerton.</p>
+            </article>
+
+            <article class="isle-card" id="isle-24-hour-fitness" data-label="24 Hour Fitness" data-kind="work" data-start="2022-06" data-end="2025-08" data-x="0.55">
+              <p class="isle-ref">~/experience/<b>24-hour-fitness</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">Sales and Service Expert</h3>
+                <div class="exp-meta"><span class="exp-company">24 Hour Fitness</span></div>
+              </div>
+              <p class="isle-date">Jun 2022 — Aug 2025<span data-tenure></span></p>
+              <p class="exp-summary">Led a team of 10 while providing daily support to 800+ members, consistently exceeding 130% of monthly revenue goals.</p>
+              <div class="chip-row"><span class="chip">Sales</span><span class="chip">Customer Service</span><span class="chip">Team Collaboration</span></div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <details class="proto-bar" open>
+    <summary>islands · dev</summary>
+    <div class="row">
+      <button type="button" id="replay">Replay sail</button>
+      <button type="button" id="theme">Toggle theme</button>
+      <button type="button" id="motion">Reduced motion</button>
+    </div>
+  </details>
+
+  <script>
+    // ---------- Sprites (pixel maps from src/scripts/hero-build.ts) ----------
+    // '.' empty, k ink, a accent, s sand, w paper. A 1px ink outline is added at draw time.
+    // o (ink) and b (accent) are thin details, like oars, that skip the outline.
+
+    const LIFEGUARD = [
+      "...kkkk....", "..kkkkkk...", "..ssssss...", "..skssks...", "..ssssss...", "...ssss....",
+      "..aaaaaa...", ".s.aaaa.s..", ".s.aaaa.aaa", "...s..s.aaa", "...s..s....", "..kk..kk...",
+    ];
+
+    // Lifeguard from the waist up in a paper rowboat with a terracotta stripe, an oar out each side.
+    // tip = the row the oar blades reach: 12 is in the water, 6 is lifted clear.
+    const BOAT_W = 27, BOAT_H = 13;
+    // tip = null leaves the boat empty, oars stowed.
+    function boatFrame(tip) {
+      const g = Array.from({ length: BOAT_H }, () => Array(BOAT_W).fill("."));
+      const oar = (r0, c0, r1, c1) => {
+        const n = Math.max(Math.abs(r1 - r0), Math.abs(c1 - c0));
+        for (let k = 0; k <= n; k++) g[Math.round(r0 + ((r1 - r0) * k) / n)][Math.round(c0 + ((c1 - c0) * k) / n)] = k >= n - 1 ? "b" : "o";
+      };
+      if (tip != null) {
+        oar(7, 8, tip, 0);
+        oar(7, 18, tip, 26);
+      }
+      const put = (rows, r0, c0) => rows.forEach((r, k) => [...r].forEach((ch, c) => { if (ch !== ".") g[r0 + k][c0 + c] = ch; }));
+      put(["wwwwwwwwwwwwwwwwwww", ".aaaaaaaaaaaaaaaaa.", "..wwwwwwwwwwwwwww.."], 9, 4);
+      if (tip != null) put([...LIFEGUARD.slice(0, 8), "...aaaa...."], 0, 8);
+      return g.map((r) => r.join(""));
+    }
+    // One stroke: catch, drive, recover, drive. Docked boats rest on frame 1; frame 3 is empty.
+    const BOAT = [12, 9, 6, null].map(boatFrame);
+    const STROKE = [0, 1, 2, 1];
+    const EMPTY = 3;
+
+    // On foot, rosy-cheeked and smiling: feet down, then mid-skip with the legs tucked and a hand in the air
+    const HAPPY = LIFEGUARD.map((r, k) => ({ 4: "..askksa..." })[k] ?? r);
+    const WALKER = [HAPPY, [
+      ...HAPPY.slice(0, 5), ".s.ssss....", ".saaaaaa...", "...aaaa.s..", "...aaaa.aaa", "....ss..aaa", "....ss.....", "...kkk.....",
+    ]];
+
+    // ---------- Islands ----------
+    // Each island is a sand mound sized by tenure, with one signature prop and at most one
+    // small extra. Current roles fly a flag. Props stand where the mound is under their feet.
+
+    const LIFTER = [
+      "aa............aa", "aakkkkkkkkkkkkaa", "aa..s......s..aa", "....s.kkkk.s....",
+      "....s.ssss.s....", "....s.kssk.s....", "....ssaaaass....", "......aaaa......",
+      "......kkkk......", "......s..s......", ".....kk..kk.....",
+    ];
+
+    // Island colours on top of the crew palette: g grass, l leaf, t wood, m gym mat, y lamp glow,
+    // u screen blue, c chalkboard. v (leaf) and f (glow) are thin details that skip the outline.
+    const PROPS = {
+      // Internet Brands: office with lit windows and an antenna, and a wooden dock for the boat
+      office: [
+        ".....b.....", ".....o.....", "..kkkkkkk..", "..wywywyw..", "..wwwwwww..",
+        "..wywywyw..", "..wwwwwww..", "..wywtwyw..", "..wwwtwww..",
+      ],
+      bush: [".ll.", "llll"],
+      dock: ["ttttttttt", ".o...o..o"],
+      // Mindful Metrics: market stall with a striped awning and goods out, crates beside it
+      stall: [
+        "awawawawaw", "awawawawaw", ".o......o.", ".o.yaul.o.",
+        "tttttttttt", ".twwwwwwt.", ".twwwwwwt.",
+      ],
+      crates: ["..ttt..", "..tkt..", "..ttt..", "ttt.ttt", "tkt.tkt", "ttt.ttt"],
+      // Crete Robotics: a boxy robot with one glowing eye, and a palm
+      robot: [
+        "...b...", "...o...", ".wwwww.", ".wwuww.", ".wwwww.",
+        "..www..", "owwwwwo", ".wayaw.", ".wwwww.", ".w...w.",
+      ],
+      palm: ["..l.l..", ".lllll.", "ll.t.ll", "l..t..l", "...t...", "....t..", "....t..", "...t..."],
+      // Yembo: the museum light wall glowing in three colours, with a mic for the speech pipeline
+      lightwall: ["kkkkkkkkk", "kayuyauyk", "kuyayuayk", "kyauayuak", "kkkkkkkkk", "..o...o..", "..o...o.."],
+      mic: ["kk.", "kk.", ".o.", ".o.", ".o.", "ooo"],
+      // CSUF Research: a camera on a pole watching a pot on a lit stove
+      camera: ["kkkk.", "kkkku", "o....", "o....", "o....", "o....", "o....", "o...."],
+      pot: ["...kk...", ".kkkkkk.", "kwwwwwwk", ".wwwwww.", ".wwwwww.", ".ayayay.", ".o....o."],
+      // Project RAISE: a wooden signpost pointing three ways, one path in terracotta
+      signpost: [
+        ".....t......", ".....twwwww.", ".....twwwwww", ".....twwwww.",
+        ".wwwwwt.....", "wwwwwwt.....", ".wwwwwt.....",
+        ".....taaaa..", ".....taaaaa.", ".....taaaa..", ".....t......", ".....t......",
+      ],
+      // Day of AI: a chalkboard on a wooden easel with a lightbulb drawn on it
+      easel: [
+        "ttttttttt", "tcccyccct", "tccyyycct", "tcccyccct", "tcccwccct", "ttttttttt",
+        ".t.....t.", "t.......t",
+      ],
+      // ACM: club tent with a pennant, a laptop out front
+      tent: [
+        ".....oaa...", ".....oa....", ".....o.....", ".....a.....", "....awa....",
+        "...awawa...", "..awawawa..", ".awawkwawa.", "awawakawawa",
+      ],
+      laptop: [".uuu.", ".uuu.", "kkkkk"],
+      // 24 Hour Fitness: a squat rack on a gym mat, and the Lifter from the hero crew
+      rack: [".w.......w.", ".w.......w.", "awooooooowa", "aw.......wa", ".w.......w.", ".w.......w.", "ww.......ww"],
+      lifter: LIFTER,
+    };
+
+    // Per island: the ground (grass or bare sand), flowers in the grass, a gym mat over
+    // [from, to) columns, and props as [prop, column on the mound, "water" to stand at its foot]
+    const ISLANDS = {
+      "internet-brands": { ground: "grass", props: [["office", 8], ["bush", 19], ["dock", 24, "water"]] },
+      "mindful-metrics": { ground: "sand", props: [["stall", 5], ["crates", 15]] },
+      "csuf-research": { ground: "grass", props: [["camera", 2], ["pot", 8]] },
+      "crete-robotics": { ground: "grass", flowers: true, props: [["robot", 3], ["palm", 11]] },
+      "yembo": { ground: "sand", props: [["lightwall", 2], ["mic", 15]] },
+      "project-raise": { ground: "grass", flowers: true, props: [["signpost", 6]] },
+      "day-of-ai": { ground: "grass", flowers: true, props: [["easel", 5]] },
+      "acm": { ground: "grass", props: [["tent", 4], ["laptop", 16]] },
+      "24-hour-fitness": { ground: "grass", mat: [3, 28], props: [["rack", 3], ["lifter", 14]] },
+    };
+
+    // "Still sailing": a terracotta flag, two frames so it flutters
+    const FLAG = [["oaaa", "oaa.", "o...", "o...", "o..."], ["oaa.", "oaaa", "o...", "o...", "o..."]];
+
+    // Mound size by tenure: small, medium, large
+    const MOUND = { s: [20, 5], m: [24, 6], l: [30, 7] };
+    function tierOf(s) {
+      const months = (s.end ?? NOW) - s.start + 1;
+      return s.main || months >= 24 ? "l" : months >= 10 || !s.end ? "m" : "s";
+    }
+
+    function islandArt(key, tier, flagFrame) {
+      const [w, h] = MOUND[tier];
+      const spec = ISLANDS[key] || { ground: "sand", props: [] };
+      const r = rng([...key].reduce((n, ch) => n * 31 + ch.charCodeAt(0), 7));
+      // Mound rows as [from, to) columns, each a little uneven but never wider above than below
+      const base = [];
+      let pl = w, pr = w;
+      for (let y = 0; y < h; y++) {
+        // a flat top that rounds off quickly, so props have level ground to stand on
+        const pad = Math.round(5 * (1 - y / (h - 1)) ** 2);
+        const j = () => (y < 2 ? Math.round(r() * 2 - 1) : 0);
+        pl = Math.min(pl, Math.max(0, pad + j()));
+        pr = Math.min(pr, Math.max(0, pad + j()));
+        base.push([pl, w - pr]);
+      }
+      const surface = (c) => { const y = base.findIndex(([a, b]) => c >= a && c < b); return y < 0 ? h - 1 : y; };
+
+      const props = spec.props.map(([name, x, at]) => ({ map: PROPS[name], x, at }));
+      if (flagFrame != null) props.unshift({ map: FLAG[flagFrame], x: 1 });
+      const widthOf = (m) => Math.max(...m.map((row) => row.length));
+      const x0 = Math.min(0, ...props.map((p) => p.x));
+      const x1 = Math.max(w, ...props.map((p) => p.x + widthOf(p.map)));
+      const TOP = 30;
+      const g = Array.from({ length: TOP + h }, () => Array(x1 - x0).fill("."));
+      const set = (y, c, ch) => { g[TOP + y][c - x0] = ch; };
+
+      base.forEach(([a, b], y) => { for (let c = a; c < b; c++) set(y, c, "s"); });
+      const grass = spec.ground === "grass";
+      for (let c = 0; c < w; c++) {
+        const top = surface(c);
+        const onMat = spec.mat && c >= spec.mat[0] && c < spec.mat[1];
+        // A grass cap two rows deep with a ragged lower edge, or a gym mat two rows thick
+        const cap = (ch, extra) => {
+          for (let y = top; y < Math.min(h - 1, top + 2 + (r() < extra ? 1 : 0)); y++) {
+            if (c >= base[y][0] && c < base[y][1]) set(y, c, ch);
+          }
+        };
+        if (onMat) cap("m", 0);
+        else if (grass) cap("g", 0.45);
+        // Blades and the odd flower along the top edge
+        if (!onMat && c > 0 && c < w - 1 && r() < (grass ? 0.3 : 0.18)) {
+          set(top - 1, c, spec.flowers && r() < 0.35 ? "f" : grass ? "v" : "o");
+        }
+      }
+      for (const p of props) {
+        const pw = widthOf(p.map), ph = p.map.length;
+        let bottom = h - 1;
+        if (p.at !== "water") {
+          // stand on top of the lowest bit of mound under the prop's feet
+          bottom = 0;
+          const feet = p.map[ph - 1];
+          for (let c = 0; c < pw; c++) if (feet[c] && feet[c] !== ".") bottom = Math.max(bottom, surface(p.x + c));
+          bottom -= 1;
+        }
+        p.map.forEach((row, y) => [...row].forEach((ch, c) => {
+          if (ch !== ".") set(bottom - (ph - 1) + y, p.x + c, ch);
+        }));
+      }
+      const rows = g.map((row) => row.join(""));
+      while (!/[^.]/.test(rows[0])) rows.shift();
+      return rows;
+    }
+
+    // Coast: the CSUF lighthouse (its light sweeps) and the OCC pier with a rowboat moored
+    const LIGHTHOUSE = [
+      "....a....", "...kkk...", "..kwywk..", "..kkkkk..", "...www...", "...aaa...", "...www...",
+      "...aaa...", "..wwwww..", "..aaaaa..", "..wwwww..", "..wwkww..", "sssssssss",
+    ];
+    const LAMP_ROW = 2;
+    const HARBOR = [
+      "o.....................", "oaa...................", "oa....................", "o.....................",
+      "tttttttttttttt........",
+      "o...o...o...o.wwwwwwww",
+      "o...o...o...o..aaaaaa.",
+      "o...o...o...o...wwww..",
+    ];
+    const MOORED_COL = 14; // where the moored boat starts; it should sit just off the shore
+
+    function spriteSVG(rows, px) {
+      const h = rows.length, w = Math.max(...rows.map((r) => r.length));
+      const at = (cx, cy) => (cy < 0 || cy >= h || cx < 0 || cx >= w ? "." : rows[cy][cx] || ".");
+      const thin = { o: "k", b: "a", v: "l", f: "y" };
+      const solid = (ch) => ch !== "." && !thin[ch];
+      const cls = thin;
+      let out = "";
+      // 1px ink outline, same rule as hero-build.ts drawSprite
+      for (let cy = -1; cy <= h; cy++) for (let cx = -1; cx <= w; cx++) {
+        if (solid(at(cx, cy)) || at(cx, cy) !== ".") continue;
+        if (solid(at(cx + 1, cy)) || solid(at(cx - 1, cy)) || solid(at(cx, cy + 1)) || solid(at(cx, cy - 1)))
+          out += `<rect class="px-k" x="${cx + 1}" y="${cy + 1}" width="1" height="1"/>`;
+      }
+      for (let cy = 0; cy < h; cy++) for (let cx = 0; cx < w; cx++) {
+        const ch = at(cx, cy);
+        if (ch !== ".") out += `<rect class="px-${cls[ch] || ch}" x="${cx + 1}" y="${cy + 1}" width="1" height="1"/>`;
+      }
+      return { svg: `<svg width="${(w + 2) * px}" height="${(h + 2) * px}" viewBox="0 0 ${w + 2} ${h + 2}" aria-hidden="true">${out}</svg>`, w: (w + 2) * px, h: (h + 2) * px };
+    }
+
+    // ---------- State ----------
+
+    const root = document.documentElement;
+    const sea = document.getElementById("isea");
+    const log = document.getElementById("isea-log");
+    const q = new URLSearchParams(location.search);
+    const reducedQuery = matchMedia("(prefers-reduced-motion: reduce)");
+    const reduced = () => root.classList.contains("force-reduced") || reducedQuery.matches;
+    const SVGNS = "http://www.w3.org/2000/svg";
+    const TAU = Math.PI * 2;
+    const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+    const lerp = (a, b, u) => a + (b - a) * u;
+    const smooth = (u) => u * u * (3 - 2 * u);
+    const hash = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+
+    const monthIndex = (s) => { const [y, m] = s.split("-").map(Number); return y * 12 + m - 1; };
+    const today = new Date();
+    const NOW = today.getFullYear() * 12 + today.getMonth();
+    const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const short = (m) => `${MON[m % 12]} ’${String(Math.floor(m / 12)).slice(2)}`;
+
+    const cards = [...log.querySelectorAll(".isle-card")];
+    const stops = cards.map((card) => {
+      const d = card.dataset;
+      return {
+        card,
+        id: card.id,
+        label: d.label,
+        landmark: d.landmark || null,
+        start: monthIndex(d.start),
+        end: d.end ? monthIndex(d.end) : null,
+        // jobs sit where they started; schools sit where they graduated
+        anchor: monthIndex(d.landmark ? d.end : d.start),
+        fx: +d.x || 0,
+        main: card.hasAttribute("data-main"),
+      };
+    });
+    let selected = stops.findIndex((s) => (q.get("at") ? s.id === "isle-" + q.get("at") : s.main));
+    if (selected < 0) selected = stops.findIndex((s) => s.main);
+    let geo = null;
+
+    function tenure(s) {
+      const n = (s.end ?? NOW) - s.start + 1;
+      const y = Math.floor(n / 12), m = n % 12;
+      if (!y) return `${n} mo`;
+      return m ? `${y} yr ${m} mo` : `${y} yr`;
+    }
+
+    cards.forEach((c, i) => {
+      const t = c.querySelector("[data-tenure]");
+      if (t) t.textContent = ` · ${tenure(stops[i])}`;
+    });
+
+    // ---------- Layout ----------
+    // Stops keep their order and sit close when their dates are close,
+    // but a long quiet stretch is capped so the sea never goes empty.
+
+    const PPM = 60;                    // px per month between neighbouring stops...
+    const GAP_MIN = 74, GAP_MAX = 150; // ...clamped to this
+    const Y_NOW = 40, PAD_BOTTOM = 110;
+
+    function layout() {
+      const W = sea.clientWidth;
+      const phone = W < 700;
+      const bleed = phone ? 16 : 44;           // the land runs this far into the left margin
+      const coast = phone ? 60 : 72;           // land edge, in sea coordinates
+      const cardW = phone ? W - 16 : Math.min(340, Math.round(W * 0.38));
+      const seaW = phone ? W : W - cardW - 36;
+      const px = phone ? 2 : 3;               // island pixel size
+      const x0 = coast + 56, x1 = seaW - 56;
+
+      // Anchor months, newest first, with "now" on top
+      const anchors = [NOW, ...new Set(stops.map((s) => s.anchor).sort((a, b) => b - a))].filter((m, k, a) => a.indexOf(m) === k);
+      const ys = [Y_NOW];
+      for (let k = 1; k < anchors.length; k++) ys.push(ys[k - 1] + clamp((anchors[k - 1] - anchors[k]) * PPM, GAP_MIN, GAP_MAX));
+      const monthY = (m) => {
+        if (m >= anchors[0]) return ys[0] - (m - anchors[0]) * PPM;
+        for (let k = 1; k < anchors.length; k++) {
+          if (m >= anchors[k]) return lerp(ys[k], ys[k - 1], (m - anchors[k]) / (anchors[k - 1] - anchors[k]));
+        }
+        return ys[ys.length - 1];
+      };
+
+      const H = Math.round(ys[ys.length - 1] + PAD_BOTTOM);
+      const pts = stops.map((s) => ({
+        x: s.landmark === "harbor" ? Math.round(coast + 4 - (MOORED_COL + 1 - HARBOR[0].length / 2 - 1) * px) // moored boat just off the shore
+          : s.landmark ? Math.round((coast - bleed) / 2)
+          : Math.round(x0 + s.fx * (x1 - x0)),
+        y: Math.round(monthY(s.anchor)),
+      }));
+      geo = { W, H, phone, bleed, coast, cardW, seaW, pts, monthY, px };
+      sea.style.setProperty("--h", H + "px");
+      sea.style.setProperty("--bleed", bleed + "px");
+    }
+
+    // ---------- Land ----------
+
+    function rng(seed) {
+      return () => {
+        seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    let land, marks, canvas, boatEl, boat = { x: 0, y: 0, dir: 1, anim: 0, w: 0, h: 0, sailing: false };
+    const buttons = [];
+
+    function el(tag, attrs, parent) {
+      const n = document.createElementNS(SVGNS, tag);
+      for (const k in attrs) n.setAttribute(k, attrs[k]);
+      parent?.appendChild(n);
+      return n;
+    }
+
+    // Land and marks are drawn in sea coordinates; their layers start `bleed` px further left
+    function layerGroup(svg) {
+      svg.innerHTML = "";
+      return el("g", { transform: `translate(${geo.bleed} 0)` }, svg);
+    }
+
+    function drawLand() {
+      const { H, bleed, coast } = geo;
+      const g = layerGroup(land);
+      const r = rng(7);
+      // Stepped pixel edge, with foam where land meets water
+      const BAND = 12;
+      let d = `M${-bleed} 0`;
+      const edges = [];
+      for (let y = 0; y < H; y += BAND) {
+        const e = coast - 10 + Math.floor(r() * 3) * 4;
+        edges.push(e);
+        d += ` H${e} V${Math.min(H, y + BAND)}`;
+      }
+      d += ` H${-bleed} Z`;
+      el("path", { d, class: "isea-land" }, g);
+      edges.forEach((e, k) => {
+        if (r() < 0.55) el("rect", { x: e + 3, y: k * BAND + 3, width: 2, height: BAND - 6, class: "isea-foam" }, g);
+      });
+      // Stepping stones from the lighthouse door down to the water. The sprite covers the ones under it.
+      const li = stops.findIndex((s) => s.landmark === "lighthouse");
+      if (li >= 0) {
+        const p = geo.pts[li];
+        const end = edges[Math.floor((p.y - 3) / BAND)] ?? coast;
+        for (let x = p.x, k = 0; x < end - 6; k++) {
+          const w = 5 + Math.floor(r() * 3), y = p.y - 5 + (k % 2 ? 1 : -1);
+          el("rect", { x: x + 1, y, width: w - 2, height: 1, class: "isea-stone" }, g);
+          el("rect", { x, y: y + 1, width: w, height: 2, class: "isea-stone" }, g);
+          el("rect", { x: x + 1, y: y + 3, width: w - 1, height: 1, class: "isea-stone-edge" }, g);
+          x += w + 2 + Math.floor(r() * 2);
+        }
+      }
+    }
+
+    function drawStops() {
+      buttons.forEach((b) => b.remove());
+      buttons.length = 0;
+      stops.forEach((s, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "isle" + (s.landmark ? " is-coast" : "");
+        b.setAttribute("aria-controls", s.id);
+        b.setAttribute("aria-label", `${s.card.querySelector(".exp-role").textContent}, ${s.label}. ${s.card.querySelector(".isle-date").textContent}`);
+        const px = geo.px;
+        const key = s.id.replace(/^isle-/, "");
+        const frames = s.landmark === "lighthouse" ? [spriteSVG(LIGHTHOUSE, px)]
+          : s.landmark === "harbor" ? [spriteSVG(HARBOR, px)]
+          : (s.end ? [null] : [0, 1]).map((f) => spriteSVG(islandArt(key, tierOf(s), f), px));
+        const art = frames[0];
+        const svgs = frames.map((f, k) => (frames.length > 1 ? f.svg.replace("<svg ", `<svg class="isle-flag-${k}" `) : f.svg)).join("");
+        const beam = s.landmark === "lighthouse"
+          ? `<span class="isle-beam" style="top:${4 + (LAMP_ROW + 1.5) * px}px"></span>` : "";
+        const when = s.landmark ? s.card.dataset.when : `${short(s.start)} – ${s.end ? short(s.end) : "now"}`;
+        b.innerHTML = `<span class="isle-art">${svgs}</span>${beam}${s.landmark ? "" : `<span class="isle-name">${s.label}</span>`}<span class="isle-when">${when}</span>`;
+        const p = geo.pts[i];
+        b.style.left = p.x + "px";
+        b.style.top = p.y - art.h - 4 + "px";
+        b.onclick = () => select(i, { user: true });
+        b.onkeydown = onKey;
+        s.artW = art.w;
+        s.artH = art.h;
+        buttons.push(b);
+        sea.insertBefore(b, log);
+      });
+    }
+
+    // Each year's label sits on the sand just below the line where that year ends (newer is higher).
+    // The timeline squeezes quiet stretches, so quiet years come out short. Labels slide off coast landmarks.
+    let yearEls = [], yearWatch = null;
+
+    function drawYears() {
+      yearEls.forEach((y) => y.remove());
+      yearWatch?.disconnect();
+      const { coast, bleed, monthY } = geo;
+      const g = land.firstChild;
+      const blocked = buttons.filter((b, i) => stops[i].landmark).map((b) => [b.offsetTop - 4, b.offsetTop + b.offsetHeight + 4]);
+      const nowYear = Math.floor(NOW / 12);
+      const firstYear = Math.floor(Math.min(...stops.map((s) => s.start)) / 12);
+      const H_LABEL = 12;
+      yearEls = [];
+      for (let yr = nowYear; yr >= firstYear; yr--) {
+        let top = 8;
+        if (yr < nowYear) {
+          const line = Math.round(monthY((yr + 1) * 12));
+          for (let x = -bleed + 6; x < coast - 14; x += 6) el("rect", { x, y: line, width: 4, height: 2, class: "isea-yearline" }, g);
+          top = line + 6;
+        }
+        for (const [a, b] of blocked) if (top < b && top + H_LABEL > a) top = b;
+        const n = document.createElement("span");
+        n.className = "isea-year";
+        n.textContent = yr;
+        n.dataset.year = yr;
+        n.setAttribute("aria-hidden", "true");
+        n.style.left = coast - 14 + "px";
+        n.style.top = top + "px";
+        sea.insertBefore(n, log);
+        yearEls.push(n);
+      }
+      // Arrives once fully on screen (a little above the bottom edge); washes back out once fully off it
+      const arrive = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          const n = e.target;
+          if (!e.isIntersecting || n.classList.contains("is-ashore")) continue;
+          n.classList.add("is-ashore");
+          if (reduced()) continue;
+          // a small wave breaks on the shore as the year lands
+          const y = n.offsetTop + 6;
+          for (let k = -1; k <= 1; k++) water.inject(coast + 10, y + k * 9, WATER.strength * 0.25);
+        }
+      }, { rootMargin: "0px 0px -12% 0px", threshold: 1 });
+      const leave = new IntersectionObserver((entries) => {
+        for (const e of entries) if (!e.isIntersecting) e.target.classList.remove("is-ashore");
+      });
+      yearWatch = { disconnect: () => { arrive.disconnect(); leave.disconnect(); } };
+      yearEls.forEach((n) => { arrive.observe(n); leave.observe(n); });
+    }
+
+    function onKey(e) {
+      const k = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+      let to = null;
+      if (k) to = Math.max(0, Math.min(stops.length - 1, selected + k));
+      if (e.key === "Home") to = 0;
+      if (e.key === "End") to = stops.length - 1;
+      if (to === null) return;
+      e.preventDefault();
+      buttons[to].focus({ preventScroll: true });
+      select(to, { user: true, scroll: true });
+    }
+
+    // ---------- Water ----------
+    // The hero's water, laid flat: a coarse 2D wave equation drawn as broken crest
+    // strokes. The pointer drags a wake through it, a click splashes, the boat rows
+    // a wake behind it, and ripples bounce off the islands and the shore.
+
+    const WATER = {
+      rowGap: 24,      // spacing between swell rows
+      wavelength: 150, // swell wavelength along a row (px)
+      crest: 0.32,     // how high the water must be to get a stroke (-1..1)
+      drift: 0.16,     // rows per second drifting down the sea
+      cell: 10,        // simulation resolution in px
+      calm: 0.985,     // damping per step (lower settles faster)
+      lift: 1.6,       // how far the water bends the strokes
+      swell: 3,        // ambient swell amplitude in px
+      radius: 110,     // wake width is radius / 40 cells
+      strength: 20,    // how hard the cursor pushes the water
+      oar: 3.2,        // how hard each oar stroke pushes
+      hull: 1.6,       // how hard the hull pushes per cell it crosses
+      rock: 2.2,       // the ripple a docked boat sends out as it rocks
+      fade: 70,        // strokes fade out over this many px at the right edge
+    };
+
+    const water = (() => {
+      const STEP = 1 / 60;
+      let ctx, C = {};
+      let cols = 0, rows = 0, Wc = 0, Hc = 0;
+      let cur = new Float32Array(0), prev = new Float32Array(0), damp = new Float32Array(0);
+      let wt = 0, acc = 0, pointer = null;
+      let keepOut = [];   // stroke-free boxes (islands and labels), canvas coords
+
+      function readColors() {
+        const css = getComputedStyle(root);
+        C = { a: css.getPropertyValue("--color-accent").trim(), line: css.getPropertyValue("--color-text-secondary").trim() };
+      }
+
+      function rebuild() {
+        Wc = geo.W + geo.bleed;
+        Hc = geo.H;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(Wc * dpr);
+        canvas.height = Math.round(Hc * dpr);
+        ctx = canvas.getContext("2d");
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        readColors();
+
+        cols = Math.ceil(Wc / WATER.cell) + 3;
+        rows = Math.ceil(Hc / WATER.cell) + 3;
+        cur = new Float32Array(cols * rows);
+        prev = new Float32Array(cols * rows);
+        // damp: 0 = solid (land, islands), <1 = absorbing outer edges, else calm
+        damp = new Float32Array(cols * rows);
+        const shore = (geo.coast - 4 + geo.bleed) / WATER.cell + 1;
+        const solids = buttons.map((b, i) => {
+          const s = stops[i];
+          if (s.landmark) return null;
+          const p = geo.pts[i];
+          return { x0: p.x - s.artW / 2 + geo.bleed, x1: p.x + s.artW / 2 + geo.bleed, y0: p.y - s.artH + 4, y1: p.y };
+        }).filter(Boolean);
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            const i = y * cols + x;
+            const px = (x - 1) * WATER.cell, py = (y - 1) * WATER.cell;
+            if (x < shore || solids.some((r) => px > r.x0 && px < r.x1 && py > r.y0 && py < r.y1)) continue;
+            const d = Math.min(cols - 1 - x, y, rows - 1 - y);
+            damp[i] = WATER.calm * (d >= 6 ? 1 : 0.86 + 0.14 * (d / 6));
+          }
+        }
+        keepOut = buttons.map((b) => ({
+          x0: b.offsetLeft - b.offsetWidth / 2 + geo.bleed - 6, x1: b.offsetLeft + b.offsetWidth / 2 + geo.bleed + 6,
+          y0: b.offsetTop - 6, y1: b.offsetTop + b.offsetHeight + 4,
+        }));
+      }
+
+      function sample(x, y) {
+        const fx = clamp(x / WATER.cell + 1, 0, cols - 1.001);
+        const fy = clamp(y / WATER.cell + 1, 0, rows - 1.001);
+        const x0 = fx | 0, y0 = fy | 0, tx = fx - x0, ty = fy - y0;
+        const i = y0 * cols + x0;
+        const top = cur[i] + (cur[i + 1] - cur[i]) * tx;
+        const bot = cur[i + cols] + (cur[i + cols + 1] - cur[i + cols]) * tx;
+        return top + (bot - top) * ty;
+      }
+
+      // 9-point Laplacian so ripples spread as circles instead of diamonds
+      function simStep() {
+        for (let y = 1; y < rows - 1; y++) {
+          for (let x = 1; x < cols - 1; x++) {
+            const i = y * cols + x;
+            const c = cur[i];
+            const edges = cur[i - 1] + cur[i + 1] + cur[i - cols] + cur[i + cols];
+            const corners = cur[i - cols - 1] + cur[i - cols + 1] + cur[i + cols - 1] + cur[i + cols + 1];
+            prev[i] = (2 * c - prev[i] + 0.5 * ((4 * edges + corners - 20 * c) / 6)) * damp[i];
+          }
+        }
+        const swap = cur; cur = prev; prev = swap;
+      }
+
+      // x, y in sea coordinates
+      function inject(x, y, amount) {
+        const r = Math.max(1.5, WATER.radius / 40);
+        const cx = (x + geo.bleed) / WATER.cell + 1, cy = y / WATER.cell + 1;
+        for (let gy = Math.floor(cy - r); gy <= Math.ceil(cy + r); gy++) {
+          for (let gx = Math.floor(cx - r); gx <= Math.ceil(cx + r); gx++) {
+            if (gx < 1 || gy < 1 || gx >= cols - 1 || gy >= rows - 1) continue;
+            const d = Math.hypot(gx - cx, gy - cy);
+            if (d < r && damp[gy * cols + gx]) cur[gy * cols + gx] -= amount * 0.5 * (1 + Math.cos((Math.PI * d) / r));
+          }
+        }
+      }
+
+      function wake(a, b, amount) {
+        const n = Math.min(40, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / WATER.cell));
+        for (let k = 1; k <= n; k++) inject(lerp(a.x, b.x, k / n), lerp(a.y, b.y, k / n), amount);
+      }
+
+      function advance(dt) {
+        acc += Math.min(dt, 0.1);
+        while (acc >= STEP) { simStep(); wt += STEP; acc -= STEP; }
+      }
+
+      const soft = (h) => 8 * Math.tanh((h * WATER.lift) / 8);
+
+      // Flat swell rows as broken crest strokes; only the band on screen is drawn
+      function draw() {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, Wc, Hc);
+        const r = sea.getBoundingClientRect();
+        const vy0 = -r.top - 40, vy1 = vy0 + innerHeight + 80;
+        const amp = reduced() ? WATER.swell * 0.6 : WATER.swell;
+        const ph = wt * 0.9;
+        const step = 4, s = 0.7;
+        const xStart = geo.coast + geo.bleed + 8;
+        const run = [];
+        ctx.lineCap = "round";
+
+        const flush = (lam) => {
+          const n = run.length / 3;
+          if (n >= 2) {
+            let hi = 0;
+            for (let k = 2; k < run.length; k += 3) hi = Math.max(hi, run[k]);
+            const bulge = (0.8 + 2.4 * s) * Math.min(1, ((n - 1) * step) / (lam * 0.3));
+            const hot = clamp((hi - 3.5) / 10);
+            const edge = clamp((Wc - run[(n >> 1) * 3]) / WATER.fade);
+            ctx.strokeStyle = hot > 0.15 ? C.a : C.line;
+            ctx.globalAlpha = Math.min(0.9, 0.14 + 0.4 * s + hot * 0.5) * edge;
+            ctx.lineWidth = 0.6 + s;
+            ctx.beginPath();
+            for (let k = 0; k < n; k++) {
+              const y = run[k * 3 + 1] - bulge * Math.sin((Math.PI * k) / (n - 1));
+              if (k) ctx.lineTo(run[k * 3], y); else ctx.moveTo(run[k * 3], y);
+            }
+            ctx.stroke();
+          }
+          run.length = 0;
+        };
+
+        const drift = wt * WATER.drift;
+        const shift = Math.floor(drift), frac = drift - shift;
+        const k0 = Math.max(0, Math.floor(vy0 / WATER.rowGap) - 1), k1 = Math.ceil(vy1 / WATER.rowGap) + 1;
+        for (let k = k0; k <= k1; k++) {
+          const y = (k + frac) * WATER.rowGap, id = k - shift;
+          if (y < 4 || y > Hc - 4) continue;
+          const lam = WATER.wavelength * (0.85 + 0.3 * hash(id + 13));
+          const kA = TAU / lam, kB = TAU / (lam * 0.47), kE = TAU / (lam * 5.3);
+          const p1 = hash(id) * TAU, p2 = hash(id + 31) * TAU, p3 = hash(id + 67) * TAU;
+          const boxes = keepOut.filter((b) => y > b.y0 - 10 && y < b.y1 + 10);
+          for (let x = xStart; x <= Wc; x += step) {
+            if (boxes.some((b) => x > b.x0 && x < b.x1 && y > b.y0 && y < b.y1)) { if (run.length) flush(lam); continue; }
+            const a = 0.7 * Math.sin(kA * x + p1 - ph) + 0.3 * Math.sin(kB * x + p2 + ph * 1.4);
+            const env = 0.5 + 0.5 * Math.sin(kE * x + p3 + ph * 0.12);
+            const h = sample(x, y);
+            const hv = h * WATER.lift;
+            const boost = 0.6 * smooth(clamp((Math.abs(hv) - 0.8) / 10));
+            if (a - (1 - env) * 0.9 * (1 - boost / 0.6) + boost > WATER.crest) {
+              run.push(x, y - a * amp * s - soft(h) * 0.8, hv);
+            } else if (run.length) flush(lam);
+          }
+          if (run.length) flush(lam);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function toSea(clientX, clientY) {
+        const r = sea.getBoundingClientRect();
+        return { x: clientX - r.left, y: clientY - r.top };
+      }
+
+      function setPointer(clientX, clientY) {
+        if (reduced()) return;
+        const p = toSea(clientX, clientY);
+        if (pointer) wake(pointer, p, WATER.strength * 0.05);
+        pointer = p;
+      }
+
+      sea.addEventListener("pointermove", (e) => { if (e.pointerType !== "touch") setPointer(e.clientX, e.clientY); });
+      sea.addEventListener("pointerleave", () => { pointer = null; });
+      sea.addEventListener("pointerdown", (e) => {
+        if (reduced() || e.target.closest("button, a, .isle-card")) return;
+        const p = toSea(e.clientX, e.clientY);
+        inject(p.x, p.y, WATER.strength * 0.4);
+      });
+      sea.addEventListener("touchmove", (e) => setPointer(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+      sea.addEventListener("touchend", () => { pointer = null; }, { passive: true });
+      new MutationObserver(readColors).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+
+      return { rebuild, advance, draw, inject, wake };
+    })();
+
+    // ---------- Clock: runs only while the sea is on screen ----------
+
+    let raf = 0, last = 0, onScreen = false;
+    function frame(now) {
+      const dt = last ? (now - last) / 1000 : 0;
+      last = now;
+      water.advance(dt);
+      if (!boat.sailing) idleRipple(now);
+      water.draw();
+      raf = requestAnimationFrame(frame);
+    }
+    function run() {
+      cancelAnimationFrame(raf);
+      last = 0;
+      if (!geo) return; // boot() calls run() once the sea is laid out
+      if (onScreen && !document.hidden && !reduced()) raf = requestAnimationFrame(frame);
+      else water.draw();
+    }
+    new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; run(); }, { rootMargin: "200px 0px" }).observe(sea);
+    document.addEventListener("visibilitychange", run);
+    addEventListener("scroll", () => { if (reduced()) water.draw(); }, { passive: true });
+
+    // A docked boat still rocks a little
+    let nextIdle = 0;
+    function idleRipple(now) {
+      if (now < nextIdle) return;
+      nextIdle = now + 1700;
+      water.inject(boat.x, boat.y + 2, WATER.rock);
+    }
+
+    // ---------- Boat ----------
+
+    // Where the boat ties up: beside the island at its waterline, on the open-water side
+    function dock(i) {
+      const s = stops[i], p = geo.pts[i];
+      if (s.landmark) return { x: Math.max(geo.coast + boat.w / 2 + 4, p.x + s.artW / 2 + boat.w / 2 + 2), y: p.y - 4, dir: -1 };
+      const right = p.x < geo.seaW - 110;
+      return { x: p.x + (right ? 1 : -1) * (s.artW / 2 + boat.w / 2 - 2), y: p.y - 4, dir: right ? -1 : 1 };
+    }
+
+    function buildBoat() {
+      boatEl?.remove();
+      boatEl = document.createElement("div");
+      boatEl.className = "isea-boat";
+      const frames = BOAT.map((f) => spriteSVG(f, 2));
+      boatEl.innerHTML = `<div class="isea-boat-bob">${frames.map((f, k) => `<div data-f="${k}"${k !== 1 ? " hidden" : ""}>${f.svg}</div>`).join("")}</div>`;
+      boat.w = frames[0].w;
+      boat.h = frames[0].h;
+      sea.insertBefore(boatEl, log);
+    }
+
+    // ---------- Ashore at the lighthouse ----------
+    // crew: "boat" (rowing or docked), "walking" (on the stones), "inside" (in the lighthouse)
+
+    let crew = "boat";
+    const walker = { el: null, anim: 0, x: 0, w: 0, h: 0, scale: 1 };
+
+    function buildWalker() {
+      walker.el?.remove();
+      walker.el = document.createElement("div");
+      walker.el.className = "isea-walker";
+      walker.el.hidden = true;
+      const frames = WALKER.map((f) => spriteSVG(f, 2));
+      walker.el.innerHTML = frames.map((f, k) => `<div data-f="${k}"${k ? " hidden" : ""}>${f.svg}</div>`).join("");
+      walker.w = frames[0].w;
+      walker.h = frames[0].h;
+      sea.insertBefore(walker.el, log);
+    }
+
+    const restFrame = () => (crew === "boat" ? 1 : EMPTY);
+
+    function stones(i) {
+      const p = geo.pts[i];
+      return { door: p.x, step: p.x + 14 + geo.px * 2, shore: boat.x - boat.w / 4, y: p.y - 3 };
+    }
+
+    // Feet on y, lifted by `lift`, shrunk toward the feet by `scale`; behind the lighthouse when `behind`
+    function poseWalker(y, lift, frame, scale = 1, behind = false) {
+      walker.el.hidden = false;
+      walker.el.style.zIndex = behind ? 1 : "";
+      walker.el.style.transform = `translate(${Math.round(walker.x - walker.w / 2)}px, ${Math.round(y - lift - walker.h)}px) scale(${scale})`;
+      walker.el.querySelectorAll("[data-f]").forEach((n) => (n.hidden = +n.dataset.f !== frame));
+      walker.scale = scale;
+    }
+
+    function tween(dur, fn, done) {
+      cancelAnimationFrame(walker.anim);
+      let t0 = null;
+      const step = (now) => {
+        t0 ??= now;
+        const t = Math.min(1, (now - t0) / dur);
+        fn(t, now - t0);
+        if (t < 1) walker.anim = requestAnimationFrame(step);
+        else done();
+      };
+      walker.anim = requestAnimationFrame(step);
+    }
+
+    // Skip along the stones: a little hop every 240ms, legs tucked while airborne
+    function skip(toX, y, done) {
+      const fromX = walker.x, HOP = 240;
+      tween(Math.max(300, (Math.abs(toX - fromX) / 46) * 1000), (t, ms) => {
+        walker.x = lerp(fromX, toX, t);
+        const ph = (ms % HOP) / HOP, lift = t < 1 ? 4 * Math.sin(Math.PI * ph) : 0;
+        poseWalker(y, lift, lift > 1.5 ? 1 : 0);
+      }, done);
+    }
+
+    // Hop up and drop through the door, shrinking into it from behind the lighthouse (or the reverse)
+    function jump(toX, y, into, done) {
+      const fromX = walker.x;
+      tween(420, (t) => {
+        walker.x = lerp(fromX, toX, t);
+        const u = into ? t : 1 - t;   // 0 at the doorstep, 1 inside
+        const lift = 18 * 4 * t * (1 - t);
+        const scale = u < 0.5 ? 1 : lerp(1, 0.15, (u - 0.5) / 0.5);
+        poseWalker(y, lift, 1, scale, u > 0.5);
+      }, done);
+    }
+
+    function lightUp(i) {
+      const b = buttons[i];
+      b.classList.add("is-lit");
+      setTimeout(() => b.classList.remove("is-lit"), 700);
+    }
+
+    // Step out of the boat, skip up the stones and jump into the lighthouse
+    function walkIn(i) {
+      const s = stones(i);
+      crew = "walking";
+      walker.x = s.shore;
+      placeBoat(boat.x, boat.y, boat.dir, EMPTY);
+      water.inject(boat.x, boat.y + 2, WATER.oar);
+      skip(s.step, s.y, () => jump(s.door, s.y, true, () => {
+        walker.el.hidden = true;
+        crew = "inside";
+        lightUp(i);
+      }));
+    }
+
+    // Jump back out (or turn around) and skip down to the boat
+    function walkOut(i, done) {
+      const s = stones(i);
+      const fromInside = crew === "inside" || walker.scale < 1;
+      if (crew === "inside") walker.x = s.door;
+      crew = "walking";
+      const down = () => skip(s.shore, s.y, () => {
+        walker.el.hidden = true;
+        crew = "boat";
+        placeBoat(boat.x, boat.y, boat.dir, 1);
+        water.inject(boat.x, boat.y + 2, WATER.oar);
+        done();
+      });
+      if (fromInside) jump(s.step, s.y, false, down);
+      else down();
+    }
+
+    function stayAshore() {
+      cancelAnimationFrame(walker.anim);
+      walker.el.hidden = true;
+      walker.scale = 1;
+      crew = stops[selected].landmark === "lighthouse" ? "inside" : "boat";
+    }
+
+    function placeBoat(x, y, dir, frame) {
+      boat.x = x; boat.y = y; boat.dir = dir;
+      // the hull's waterline (sprite row 11) sits on y
+      boatEl.style.transform = `translate(${Math.round(x - boat.w / 2)}px, ${Math.round(y - 12 * 2)}px) scaleX(${dir})`;
+      boatEl.querySelectorAll("[data-f]").forEach((f) => (f.hidden = +f.dataset.f !== frame));
+    }
+
+    // Row along a gentle S-curve through open water. Each catch of the oars pushes the water.
+    function sail(from, to, done) {
+      closeCard();
+      boat.sailing = true;
+      const dist = Math.hypot(to.x - from.x, to.y - from.y);
+      const dur = clamp(dist * 3.2, 1800, 5000);
+      const bend = Math.min(60, dist * 0.15) * (from.x < geo.seaW / 2 ? 1 : -1);
+      const c1 = { x: from.x + bend, y: from.y + (to.y - from.y) * 0.3 };
+      const c2 = { x: to.x + bend, y: from.y + (to.y - from.y) * 0.7 };
+      const bez = (a, b, c, d, t) => (1 - t) ** 3 * a + 3 * (1 - t) ** 2 * t * b + 3 * (1 - t) * t * t * c + t ** 3 * d;
+      let t0 = null, prev = { ...from }, lastBeat = -1;
+      const step = (now) => {
+        t0 ??= now; // the first frame's timestamp, so the clock matches rAF's
+        const t = Math.min(1, (now - t0) / dur);
+        const e = t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+        const x = bez(from.x, c1.x, c2.x, to.x, e), y = bez(from.y, c1.y, c2.y, to.y, e);
+        const dir = t < 1 ? (Math.abs(x - prev.x) > 0.3 ? (x > prev.x ? 1 : -1) : boat.dir) : to.dir;
+        const beat = Math.floor((now - t0) / 170);
+        const frame = t < 1 ? STROKE[beat % STROKE.length] : 1;
+        placeBoat(x, y, dir, frame);
+        water.wake(prev, { x, y }, WATER.hull);
+        if (beat !== lastBeat && frame === 0) {
+          // oar blades dip in on both sides
+          water.inject(x - boat.w / 2 + 2, y + 2, WATER.oar);
+          water.inject(x + boat.w / 2 - 2, y + 2, WATER.oar);
+        }
+        lastBeat = beat;
+        prev = { x, y };
+        if (t < 1) boat.anim = requestAnimationFrame(step);
+        else { boat.sailing = false; done(); }
+      };
+      boat.anim = requestAnimationFrame(step);
+    }
+
+    // ---------- Selection ----------
+
+    function drawSpan(i) {
+      const g = layerGroup(marks);
+      const s = stops[i];
+      const x = geo.coast + 6;
+      const yA = Math.round(geo.monthY(s.start));
+      const yB = Math.round(geo.monthY(s.end ?? NOW));
+      const span = el("g", { class: "isea-span" }, g);
+      el("line", { x1: x, x2: x, y1: yB, y2: yA }, span);
+      el("line", { x1: x - 4, x2: x + 4, y1: yA, y2: yA }, span);
+      if (s.end) el("line", { x1: x - 4, x2: x + 4, y1: yB, y2: yB }, span);
+      else el("line", { x1: x, x2: x, y1: yB, y2: 0, class: "is-open" }, span);
+    }
+
+    function openCard(i) {
+      cards.forEach((c, k) => c.classList.toggle("is-open", k === i));
+      buttons.forEach((b, k) => { b.classList.toggle("is-active", k === i); b.setAttribute("aria-expanded", k === i); });
+      const c = cards[i], p = geo.pts[i], d = dock(i);
+      c.style.width = geo.cardW + "px";
+      const left = geo.phone ? 8 : geo.seaW + 36;
+      c.style.left = left + "px";
+      c.style.top = "0px";
+      const h = c.offsetHeight;
+      const top = Math.max(0, Math.min(geo.H - h, geo.phone ? p.y + 40 : p.y - 70));
+      c.style.top = top + "px";
+      marks.querySelector(".isea-leader")?.remove();
+      if (!geo.phone) {
+        const xa = d.x + boat.w / 2 - 2, ya = d.y - 12;
+        const yb = Math.max(top + 24, Math.min(top + h - 24, ya));
+        el("path", { d: `M${Math.round(xa)} ${Math.round(ya)} H${left - 18} L${left} ${Math.round(yb)}`, class: "isea-leader" }, marks.firstChild);
+      }
+      return c;
+    }
+
+    function closeCard() {
+      cards.forEach((c) => c.classList.remove("is-open"));
+      buttons.forEach((b) => b.classList.remove("is-active"));
+      marks.querySelector(".isea-leader")?.remove();
+    }
+
+    function select(i, opts = {}) {
+      if (i < 0 || i >= stops.length) return;
+      // already here and ashore: leave him be
+      if (i === selected && crew !== "boat") { openCard(i); return; }
+      const left = selected;
+      selected = i;
+      drawSpan(i);
+      if (opts.scroll) buttons[i].scrollIntoView({ block: "center", behavior: reduced() ? "auto" : "smooth" });
+      cancelAnimationFrame(boat.anim);
+      cancelAnimationFrame(walker.anim);
+      boat.sailing = false;
+      const lighthouse = stops[i].landmark === "lighthouse";
+
+      const go = () => {
+        const from = { x: boat.x, y: boat.y };
+        const to = dock(i);
+        if (opts.instant || reduced() || Math.hypot(to.x - from.x, to.y - from.y) < 2) {
+          stayAshore();
+          placeBoat(to.x, to.y, to.dir, restFrame());
+          openCard(i);
+          return;
+        }
+        sail(from, to, () => {
+          const c = openCard(i);
+          if (opts.user && !opts.scroll) c.scrollIntoView({ block: "nearest", behavior: "smooth" });
+          if (lighthouse) walkIn(i);
+        });
+      };
+
+      // Ashore at the lighthouse: walk back to the boat before rowing off
+      if (crew !== "boat" && i !== left) {
+        if (opts.instant || reduced()) { stayAshore(); placeBoat(boat.x, boat.y, boat.dir, restFrame()); go(); }
+        else { closeCard(); walkOut(left, go); }
+      } else go();
+    }
+
+    // ---------- Boot ----------
+
+    function render() {
+      cancelAnimationFrame(boat.anim);
+      boat.sailing = false;
+      layout();
+      if (!land) {
+        canvas = document.createElement("canvas");
+        canvas.className = "isea-layer isea-water";
+        canvas.setAttribute("aria-hidden", "true");
+        land = document.createElementNS(SVGNS, "svg");
+        land.setAttribute("class", "isea-layer");
+        land.setAttribute("aria-hidden", "true");
+        marks = land.cloneNode();
+        sea.prepend(canvas, land);
+        sea.insertBefore(marks, log);
+        buildBoat();
+        buildWalker();
+      }
+      drawLand();
+      drawStops();
+      water.rebuild();
+      drawYears();
+      const d = dock(selected);
+      stayAshore();
+      placeBoat(d.x, d.y, d.dir, restFrame());
+      drawSpan(selected);
+      openCard(selected);
+      water.draw();
+    }
+
+    function boot() {
+      root.classList.toggle("is-reduced", reduced());
+      document.body.classList.add("isea-on");
+      render();
+      run();
+      let lastW = sea.clientWidth;
+      new ResizeObserver(() => {
+        const w = sea.clientWidth;
+        if (w === lastW) return;
+        lastW = w;
+        render();
+      }).observe(sea);
+      // ?sail=<id> rows from the current stop to that one after a beat (for review)
+      const target = stops.findIndex((s) => s.id === "isle-" + q.get("sail"));
+      if (target >= 0) setTimeout(() => select(target, { user: true }), 400);
+    }
+
+    // ---------- Dev panel ----------
+
+    // Replay: start at the OCC harbor (where it all set out from) and row up to the current role
+    document.getElementById("replay").onclick = () => {
+      select(stops.findIndex((s) => s.landmark === "harbor"), { instant: true });
+      buttons[selected].scrollIntoView({ block: "center" });
+      setTimeout(() => select(stops.findIndex((s) => s.main), { user: true }), 400);
+    };
+    document.getElementById("theme").onclick = () => {
+      root.setAttribute("data-theme", root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+    };
+    const motionBtn = document.getElementById("motion");
+    motionBtn.setAttribute("aria-pressed", reduced());
+    motionBtn.onclick = () => {
+      root.classList.toggle("force-reduced");
+      root.classList.toggle("is-reduced", reduced());
+      motionBtn.setAttribute("aria-pressed", reduced());
+      run();
+    };
+    if (q.get("panel") === "closed") document.querySelector(".proto-bar").open = false;
+
+    document.fonts.ready.then(boot);
+  </script>
+</body>
+</html>
