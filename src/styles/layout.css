@@ -67,7 +67,14 @@
 .skills-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  /* The flexible last row absorbs any overflow from the tall cell,
+     so the extra height lands below Cloud instead of above it */
+  grid-template-rows: auto auto 1fr;
   gap: 1.5rem;
+}
+
+.skills-category-tall {
+  grid-row: span 2;
 }
 
 /* ========================================
@@ -197,6 +204,11 @@
 
   .skills-grid {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+
+  .skills-category-tall {
+    grid-row: auto;
   }
 
   .site-footer {

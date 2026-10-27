@@ -7,7 +7,8 @@ const categories = [
   { title: "Languages", items: skills.languages },
   { title: "Frameworks", items: skills.frameworks },
   { title: "Databases", items: skills.databases },
-  { title: "Tools", items: skills.tools },
+  // The longest list spans two rows so Cloud packs under Databases
+  { title: "Tools", items: skills.tools, tall: true },
   { title: "Cloud", items: skills.cloud },
 ];
 ---
@@ -25,7 +26,7 @@ const categories = [
 
     <div class="skills-grid reveal" style="margin-top: 2.5rem;">
       {categories.map((cat) => (
-        <div>
+        <div class:list={[cat.tall && "skills-category-tall"]}>
           <h3 class="skills-category-title">{cat.title}</h3>
           <div class="chip-row">
             {cat.items.map((item) => (
