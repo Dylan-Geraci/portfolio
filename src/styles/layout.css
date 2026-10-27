@@ -78,42 +78,6 @@
 }
 
 /* ========================================
-   Experience List
-   ======================================== */
-
-.experience-list {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  padding-left: 1.75rem;
-}
-
-/* The terracotta timeline spine */
-.experience-list::before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 0.4rem;
-  bottom: 0.4rem;
-  width: 2px;
-  background: linear-gradient(
-    to bottom,
-    var(--color-accent),
-    var(--color-border) 85%
-  );
-}
-
-.experience-item {
-  position: relative;
-}
-
-.experience-item + .experience-item {
-  padding-top: 2.5rem;
-  margin-top: 2.5rem;
-  border-top: 1px solid var(--color-border);
-}
-
-/* ========================================
    Projects Grid
    ======================================== */
 

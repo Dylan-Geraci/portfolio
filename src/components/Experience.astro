@@ -1,7 +1,14 @@
 ---
 import SectionLabel from "./SectionLabel.astro";
-import ExperienceItem from "./ExperienceItem.astro";
-import { experience } from "../content";
+import TechChip from "./TechChip.astro";
+import { experience, education } from "../content";
+
+// One stop per job or school, newest first. Jobs sit where they started, schools where they graduated.
+const stops = [
+  ...experience.map((e) => ({ ...e, anchor: e.start, landmark: undefined })),
+  ...education.map((e) => ({ ...e, anchor: e.end })),
+].sort((a, b) => b.anchor.localeCompare(a.anchor));
+const mainKey = experience.find((e) => !e.end)?.key;
 ---
 
 <section class="site-container section" id="experience" aria-labelledby="experience-heading">
@@ -10,10 +17,61 @@ import { experience } from "../content";
   </div>
   <div class="section-content">
     <h2 id="experience-heading" class="sr-only">Experience</h2>
-    <div class="experience-list">
-      {experience.map((entry) => (
-        <ExperienceItem entry={entry} />
-      ))}
+    <div class="isea" id="isea">
+      <div class="isea-log" id="isea-log">
+        {stops.map((s) =>
+          s.landmark ? (
+            <article
+              class="isle-card"
+              id={`isle-${s.key}`}
+              data-label={s.label}
+              data-kind="school"
+              data-landmark={s.landmark}
+              data-start={s.start}
+              data-end={s.end}
+              data-when={s.when}
+            >
+              <p class="isle-ref">~/education/<b>{s.key}</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">{s.title}</h3>
+                <div class="exp-meta">
+                  <a href={s.orgUrl} target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">{s.org}</a>
+                </div>
+              </div>
+              <p class="isle-date">{s.date}</p>
+              <p class="exp-summary">{s.summary}</p>
+            </article>
+          ) : (
+            <article
+              class="isle-card"
+              id={`isle-${s.key}`}
+              data-label={s.label}
+              data-kind={s.kind}
+              data-start={s.start}
+              data-end={s.end}
+              data-x={s.x}
+              data-main={s.key === mainKey ? "" : undefined}
+            >
+              <p class="isle-ref">~/experience/<b>{s.key}</b></p>
+              <div class="exp-header">
+                <h3 class="exp-role">{s.role}</h3>
+                <div class="exp-meta">
+                  {s.companyUrl ? (
+                    <a href={s.companyUrl} target="_blank" rel="noopener noreferrer" class="exp-company exp-company-link">{s.company}</a>
+                  ) : (
+                    <span class="exp-company">{s.company}</span>
+                  )}
+                </div>
+              </div>
+              <p class="isle-date">{s.date}<span data-tenure></span></p>
+              {s.summary && <p class="exp-summary">{s.summary}</p>}
+              <div class="chip-row">
+                {s.tags.map((tag) => <TechChip label={tag} />)}
+              </div>
+            </article>
+          )
+        )}
+      </div>
     </div>
   </div>
 </section>

@@ -7,6 +7,8 @@
 // components.css) and two canvases. Reduced motion and repeat visits in the
 // same session skip straight to the finished intro on still water.
 
+import { LIFEGUARD, LIFTER, eachOutlineCell } from "./sprites";
+
 type Job = "rows" | "arrows" | "name" | "buttons";
 type Motion = "walk" | "surf" | "fly";
 type Trail = "spray" | "drips";
@@ -85,23 +87,6 @@ const GULL = [[
 ], [
   "............", "............", "kkkkwwwwkkww", "....wwwwwwkw", ".....wwwwwaa", "......a..a..",
 ]];
-const LIFTER = [[
-  "aa............aa", "aakkkkkkkkkkkkaa", "aa..s......s..aa", "....s.kkkk.s....",
-  "....s.ssss.s....", "....s.kssk.s....", "....ssaaaass....", "......aaaa......",
-  "......kkkk......", "......s..s......", ".....kk..kk.....",
-], [
-  "aa............aa", "aakkkkkkkkkkkkaa", "aa..s......s..aa", "....s.kkkk.s....",
-  "....s.ssss.s....", "....s.kssk.s....", "....ssaaaass....", "......aaaa......",
-  "......kkkk......", ".....s....s.....", "....kk....kk....",
-]];
-const LIFEGUARD = [[
-  "...kkkk....", "..kkkkkk...", "..ssssss...", "..skssks...", "..ssssss...", "...ssss....",
-  "..aaaaaa...", ".s.aaaa.s..", ".s.aaaa.aaa", "...s..s.aaa", "...s..s....", "..kk..kk...",
-], [
-  "...kkkk....", "..kkkkkk...", "..ssssss...", "..skssks...", "..ssssss...", "...ssss....",
-  "..aaaaaa...", ".s.aaaa.s..", ".s.aaaa.aaa", "...s.s..aaa", "..s...s....", ".kk...kk...",
-]];
-
 /* ========================================
    Crew: one builder per job.
    ======================================== */
@@ -613,14 +598,9 @@ function initHeroBuild(stage: HTMLElement) {
       return rows[cy][flip ? w - 1 - cx : cx] || ".";
     };
     ctx.fillStyle = C.k;
-    for (let cy = -1; cy <= h; cy++) {
-      for (let cx = -1; cx <= w; cx++) {
-        if (at(cx, cy) !== ".") continue;
-        if (at(cx + 1, cy) !== "." || at(cx - 1, cy) !== "." || at(cx, cy + 1) !== "." || at(cx, cy - 1) !== ".") {
-          ctx.fillRect(ox + cx * px, oy + cy * px, px, px);
-        }
-      }
-    }
+    eachOutlineCell(rows, (ch) => ch !== ".", (cx, cy) => {
+      ctx.fillRect(ox + (flip ? w - 1 - cx : cx) * px, oy + cy * px, px, px);
+    });
     for (let cy = 0; cy < h; cy++) {
       for (let cx = 0; cx < w; cx++) {
         const ch = at(cx, cy);

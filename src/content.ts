@@ -19,86 +19,196 @@ export const about = {
   },
 };
 
+/** A month as "YYYY-MM". */
+export type Month = `${number}-${number}`;
+
 export interface ExperienceEntry {
+  /** Slug for the card id and the island art in experience-islands.ts. */
+  key: string;
+  /** Short name under the island. */
+  label: string;
+  kind: "work" | "campus";
   role: string;
   company: string;
   companyUrl?: string;
   date: string;
+  start: Month;
+  /** No end means the role is current. */
+  end?: Month;
+  /** Where the island sits across the sea, from 0 (shore) to 1 (open water). */
+  x: number;
   summary?: string;
   tags: string[];
 }
 
 export const experience: ExperienceEntry[] = [
   {
+    key: "internet-brands",
+    label: "Internet Brands",
+    kind: "work",
     role: "Associate AI Software Engineer",
     company: "Internet Brands",
     companyUrl: "https://www.internetbrands.com/",
     date: "Aug 2026 — Present",
+    start: "2026-08",
+    x: 0.62,
     summary: "Building agentic AI workflows and full-stack features across Internet Brands' product platform, from API design to CI/CD-driven deployment.",
     tags: ["Agile Methodologies", "Agentic Workflows", "CI/CD", "Docker", "PostgreSQL"],
   },
   {
+    key: "mindful-metrics",
+    label: "Mindful Metrics",
+    kind: "work",
     role: "Software Engineer",
     company: "Mindful Metrics",
     companyUrl: "https://mindfulmetrics.cc/",
     date: "May 2026 — Present",
+    start: "2026-05",
+    x: 0.34,
     summary: "Integrated Google GenAI SDK into a DTF marketplace to power intelligent technician-job matching. Refactored an e-commerce platform to FastAPI/React with Stripe and Shopify integration, supporting 1M+ items sold. Launched a logistics platform integrating CRM and ERP APIs with i18n support across English and Chinese.",
     tags: ["Python", "FastAPI", "React.js", "Google GenAI", "Stripe", "REST APIs", "i18n"],
   },
   {
+    key: "crete-robotics",
+    label: "Crete Robotics",
+    kind: "work",
     role: "Software Engineer Intern",
     company: "Crete Robotics Solutions",
     companyUrl: "https://www.cretebot.ai/",
     date: "Oct 2025 — May 2026",
+    start: "2025-10",
+    end: "2026-05",
+    x: 0.58,
     summary: "Designed a RESTful API with 30+ endpoints supporting task matching and messaging. Implemented real-time WebSocket messaging with JWT authentication and MongoDB persistence. Established pytest unit tests maintaining 80% code coverage across all API endpoints.",
     tags: ["Python", "FastAPI", "MongoDB", "REST APIs", "WebSockets", "Pytest"],
   },
   {
+    key: "csuf-research",
+    label: "CSUF Research",
+    kind: "campus",
     role: "Research Assistant",
     company: "Dr. Anand Panangadan — CSUF",
     companyUrl: "https://www.fullerton.edu/ecs/faculty/apanangadan/",
     date: "Nov 2025 — May 2026",
+    start: "2025-11",
+    end: "2026-05",
+    x: 0.12,
     summary: "Contributed to a real-time smart cooking assistant for low-income supportive housing — a multi-semester research project deploying a fine-tuned YOLOv11s model on a Raspberry Pi 5 with an AI HAT+ NPU for edge-based cooking state detection. The system uses a custom dataset of 1,300+ labeled images, temporal majority-vote stabilization, and async API integration to guide residents step-by-step through recipes via computer vision.",
     tags: ["Python", "Raspberry Pi", "Computer Vision", "AI/ML", "Embedded Systems", "Thermal Imaging"],
   },
   {
+    key: "project-raise",
+    label: "Project RAISE",
+    kind: "campus",
     role: "Peer Advisor",
     company: "Project RAISE",
     companyUrl: "https://www.fullerton.edu/projectraise/",
     date: "Jul 2025 — May 2026",
+    start: "2025-07",
+    end: "2026-05",
+    x: 0.3,
     summary: "Mentored 40+ STEM transfer students through 1-on-1 advising, technical guidance, and academic planning. Delivered technical presentations and workshops to 100+ students on software engineering and career development.",
     tags: ["Mentoring", "Leadership", "STEM Education"],
   },
   {
+    key: "yembo",
+    label: "Yembo",
+    kind: "work",
     role: "Software Engineer Intern",
     company: "Yembo",
     companyUrl: "https://www.emit-light.com/lightwall",
     date: "Sep 2025 — Jan 2026",
+    start: "2025-09",
+    end: "2026-01",
+    x: 0.9,
     summary: "Rebuilt a multi-threaded Python system orchestrating 16 microcontrollers for real-time AI interaction, and engineered a speech recognition pipeline using whisper.cpp achieving 2–4s response latency. Deployed a production AI installation serving continuous live interaction during a multi-month museum exhibition.",
     tags: ["Python", "Embedded Systems", "Speech Recognition", "AI/ML", "whisper.cpp"],
   },
   {
+    key: "acm",
+    label: "ACM",
+    kind: "campus",
     role: "Artificial Intelligence Officer",
     company: "ACM",
     companyUrl: "https://acmcsuf.com",
     date: "May 2025 — May 2026",
+    start: "2025-05",
+    end: "2026-05",
+    x: 0.1,
     summary: "Served as a board member for the AI Team, conducting Data Science and ML workshops for 35+ students covering feature engineering, model training, and evaluation. Increased workshop attendance by 50% by developing real-world programming demo applications.",
     tags: ["Technical Communication", "Project Planning", "AI/ML"],
   },
   {
+    key: "day-of-ai",
+    label: "Day of AI",
+    kind: "work",
     role: "AI Instructor",
     company: "MIT's Day of AI — NextEdu Lab",
     companyUrl: "https://dayofai.org",
     date: "Jun 2025 — Sep 2025",
+    start: "2025-06",
+    end: "2025-09",
+    x: 0.72,
     summary: "Taught MIT AI concepts using Scratch, DALL·E, and ChatGPT, guiding students through hands-on activities and prompt-based AI interactions in a collaborative learning environment.",
     tags: ["Artificial Intelligence", "Machine Learning", "Teaching"],
   },
   {
+    key: "24-hour-fitness",
+    label: "24 Hour Fitness",
+    kind: "work",
     role: "Sales and Service Expert",
     company: "24 Hour Fitness",
     date: "Jun 2022 — Aug 2025",
+    start: "2022-06",
+    end: "2025-08",
+    x: 0.55,
     summary: "Led a team of 10 while providing daily support to 800+ members, consistently exceeding 130% of monthly revenue goals.",
     tags: ["Sales", "Customer Service", "Team Collaboration"],
+  },
+];
+
+/** Schools are landmarks on the shore rather than islands. */
+export interface EducationEntry {
+  key: string;
+  label: string;
+  title: string;
+  org: string;
+  orgUrl: string;
+  date: string;
+  start: Month;
+  end: Month;
+  landmark: "lighthouse" | "harbor";
+  /** The landmark's label: the graduation month. */
+  when: string;
+  summary: string;
+}
+
+export const education: EducationEntry[] = [
+  {
+    key: "csuf",
+    label: "CSUF",
+    title: "B.S. Computer Science",
+    org: "California State University, Fullerton",
+    orgUrl: "https://www.fullerton.edu/",
+    date: "2024 — May 2026 · transfer",
+    start: "2024-08",
+    end: "2026-05",
+    landmark: "lighthouse",
+    when: "May 2026",
+    summary: "Graduated May 2026 with a 3.98 GPA.",
+  },
+  {
+    key: "occ",
+    label: "OCC",
+    title: "Orange Coast College",
+    org: "Costa Mesa, CA",
+    orgUrl: "https://orangecoastcollege.edu/",
+    date: "2022 — May 2024",
+    start: "2022-06",
+    end: "2024-05",
+    landmark: "harbor",
+    when: "May 2024",
+    summary: "4.0 GPA, President's List. Transferred to Cal State Fullerton.",
   },
 ];
 
